@@ -143,7 +143,7 @@
                 @foreach($featured as $listing)
                     <a href="{{ route('listings.show', $listing) }}" class="modern-property-card">
                         <div class="modern-property-card__image-wrap">
-                            <img class="modern-property-card__image" src="{{ $listing->imageUrl() }}" alt="{{ $listing->title }}">
+                            <img class="modern-property-card__image {{ $listing->cardImageClass() }}" src="{{ $listing->imageUrl() }}" alt="{{ $listing->title }}" loading="lazy" onerror="this.onerror=null;this.src='{{ \App\Models\Listing::defaultImageUrl() }}';this.classList.add('property-card__image--placeholder');">
                             <div class="modern-property-card__photo-count">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                                 {{ rand(4, 15) }}
@@ -272,7 +272,7 @@
                 @foreach($investListings as $listing)
                     @php($secondary = $listing->investSecondaryStat())
                     <a href="{{ route('listings.show', $listing) }}" class="mb-corridor-card">
-                        <img src="{{ $listing->imageUrl() }}" class="mb-corridor-card__image" alt="{{ $listing->title }}" loading="lazy">
+                        <img src="{{ $listing->imageUrl() }}" class="mb-corridor-card__image {{ $listing->cardImageClass() }}" alt="{{ $listing->title }}" loading="lazy" onerror="this.onerror=null;this.src='{{ \App\Models\Listing::defaultImageUrl() }}';this.classList.add('property-card__image--placeholder');">
                         <div class="mb-corridor-card__body">
                             <h3 class="mb-corridor-card__title">{{ $listing->title }}</h3>
                             <ul class="mb-corridor-card__list">

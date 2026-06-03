@@ -7,19 +7,10 @@
     <div class="container split">
         <aside class="glass glass--pad">
             <h2 class="section-title" style="font-size:1.1rem">Refine</h2>
-            <p class="muted" style="font-size:0.92rem">Jump to a category, then pick a property type.</p>
-
-            <div class="subtype-list mt-3">
-                <a href="{{ route('listings.index') }}" class="{{ empty($filters['kind']) ? 'is-active' : '' }}">All listings</a>
-                @foreach($kinds as $kindKey => $meta)
-                    <a href="{{ route('listings.index', ['kind' => $kindKey]) }}"
-                       class="{{ ($filters['kind'] ?? null) === $kindKey ? 'is-active' : '' }}">{{ $meta['nav_label'] ?? $meta['label'] }}</a>
-                @endforeach
-            </div>
 
             @php($activeKind = $filters['kind'] ?? null)
             @if($activeKind && isset($kinds[$activeKind]))
-                <div class="mt-3">
+                <div class="mt-2">
                     <div class="field-label">Types in this category</div>
                     <div class="subtype-list">
                         @foreach($kinds[$activeKind]['subtypes'] as $subKey => $label)
@@ -33,7 +24,7 @@
 
         <div>
             <h1 class="section-title">Listings</h1>
-            <p class="section-lead">Showing published properties. Use the panel to narrow by segment and type.</p>
+            <p class="section-lead">Showing published properties. Use the panel to narrow by property type, or switch category from the menu above.</p>
 
             <form method="get" action="{{ route('listings.index') }}" class="glass glass--pad mt-2" style="margin-bottom:22px">
                 <div class="search-row">
@@ -119,7 +110,7 @@
                     @foreach($listings as $listing)
                         <article class="property-card">
                             <a href="{{ route('listings.show', $listing) }}">
-                                <img class="property-card__image" src="{{ $listing->imageUrl() }}" alt="">
+                                <img class="property-card__image {{ $listing->cardImageClass() }}" src="{{ $listing->imageUrl() }}" alt="{{ $listing->title }}" loading="lazy" onerror="this.onerror=null;this.src='{{ \App\Models\Listing::defaultImageUrl() }}';this.classList.add('property-card__image--placeholder');">
                             </a>
                             <div class="property-card__body">
                                 <div class="property-card__meta">{{ $listing->kindLabel() }} · {{ $listing->subtypeLabel() }}</div>

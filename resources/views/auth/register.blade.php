@@ -13,7 +13,7 @@
 <div class="auth-wrap">
     <div class="glass auth-card">
         <h1>Create account</h1>
-        <p class="muted">Register as an agent or property owner to post listings on Lanka Realtors.</p>
+        <p class="muted">Register as an agent or property owner to post listings on Lanka Realtors. Your account must be approved by an administrator before you can log in.</p>
 
         <form method="POST" action="{{ route('register') }}" class="mt-3" id="register-form">
             @csrf

@@ -20,6 +20,7 @@ class UserSeeder extends Seeder
                 'name' => 'Site Admin',
                 'password' => $password,
                 'role' => User::ROLE_ADMIN,
+                'approval_status' => User::APPROVAL_APPROVED,
                 'phone' => '+94 11 234 5678',
                 'email_verified_at' => now(),
             ]
@@ -97,6 +98,7 @@ class UserSeeder extends Seeder
                 array_merge($agent, [
                     'password' => $password,
                     'role' => User::ROLE_AGENT,
+                    'approval_status' => User::APPROVAL_APPROVED,
                     'email_verified_at' => now(),
                 ])
             );
@@ -129,6 +131,7 @@ class UserSeeder extends Seeder
                 array_merge($owner, [
                     'password' => $password,
                     'role' => User::ROLE_OWNER,
+                    'approval_status' => User::APPROVAL_APPROVED,
                     'email_verified_at' => now(),
                 ])
             );

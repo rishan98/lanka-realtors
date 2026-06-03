@@ -102,7 +102,7 @@
                     @foreach($listings as $listing)
                         <article class="property-card">
                             <a href="{{ route('listings.show', $listing) }}">
-                                <img class="property-card__image" src="{{ $listing->imageUrl() }}" alt="{{ $listing->title }}">
+                                <img class="property-card__image {{ $listing->cardImageClass() }}" src="{{ $listing->imageUrl() }}" alt="{{ $listing->title }}" loading="lazy" onerror="this.onerror=null;this.src='{{ \App\Models\Listing::defaultImageUrl() }}';this.classList.add('property-card__image--placeholder');">
                             </a>
                             <div class="property-card__body">
                                 <div class="property-card__meta">{{ $listing->kindLabel() }} · {{ $listing->subtypeLabel() }}</div>

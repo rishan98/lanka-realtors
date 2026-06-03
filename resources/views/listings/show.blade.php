@@ -164,7 +164,7 @@
                     @foreach($similarListings as $similar)
                         <a href="{{ route('listings.show', $similar) }}" class="modern-property-card">
                             <div class="modern-property-card__image-wrap">
-                                <img class="modern-property-card__image" src="{{ $similar->imageUrl() }}" alt="{{ $similar->title }}" loading="lazy">
+                                <img class="modern-property-card__image {{ $similar->cardImageClass() }}" src="{{ $similar->imageUrl() }}" alt="{{ $similar->title }}" loading="lazy" onerror="this.onerror=null;this.src='{{ \App\Models\Listing::defaultImageUrl() }}';this.classList.add('property-card__image--placeholder');">
                             </div>
                             <div class="modern-property-card__content">
                                 <div class="modern-property-card__meta">

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -58,6 +59,7 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => $data['role'],
+            'approval_status' => User::APPROVAL_PENDING,
             'phone' => $data['phone'] ?? null,
             'agency_name' => ($data['role'] ?? User::ROLE_AGENT) === User::ROLE_AGENT
                 ? ($data['agency_name'] ?? null)
@@ -67,6 +69,12 @@ class RegisterController extends Controller
 
     protected function registered(Request $request, $user)
     {
-        return redirect(RouteServiceProvider::homeFor($user));
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()
+            ->route('register.pending')
+            ->with('status', 'Your account has been submitted. An administrator will review your registration before you can log in.');
     }
 }

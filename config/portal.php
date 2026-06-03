@@ -3,6 +3,14 @@
 return [
     'tagline' => 'Properties for every Sri Lankan buyer & renter.',
 
+    'company' => [
+        'email' => env('PORTAL_CONTACT_EMAIL', 'hello@lankarealtors.test'),
+        'phone' => env('PORTAL_CONTACT_PHONE', '+94 11 234 5678'),
+        'address_line' => '42 Galle Road, Colombo 03',
+        'city' => 'Colombo, Sri Lanka',
+        'hours' => 'Monday – Friday, 9:00 AM – 6:00 PM (SLST)',
+    ],
+
     'promo_cards' => [
         [
             'title' => 'Find a verified realtor',
@@ -96,6 +104,15 @@ return [
                 ['label' => 'Rooms & annexe', 'route' => 'listings.index', 'params' => ['kind' => 'rental', 'subtype' => 'rooms']],
                 ['label' => 'Short term rentals', 'route' => 'listings.index', 'params' => ['kind' => 'rental']],
                 ['label' => 'Commercial for rent', 'route' => 'listings.index', 'params' => ['kind' => 'rental', 'subtype' => 'commercial']],
+            ],
+        ],
+        [
+            'title' => 'Company',
+            'links' => [
+                ['label' => 'About us', 'route' => 'about'],
+                ['label' => 'Contact us', 'route' => 'contact'],
+                ['label' => 'Find a realtor', 'route' => 'find-realtor'],
+                ['label' => 'Grab me', 'route' => 'grab-me'],
             ],
         ],
     ],

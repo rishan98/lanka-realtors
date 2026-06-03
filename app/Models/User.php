@@ -19,11 +19,18 @@ class User extends Authenticatable
 
     public const ROLE_OWNER = 'owner';
 
+    public const APPROVAL_PENDING = 'pending';
+
+    public const APPROVAL_APPROVED = 'approved';
+
+    public const APPROVAL_REJECTED = 'rejected';
+
     protected $fillable = [
         'name',
         'email',
         'password',
         'role',
+        'approval_status',
         'phone',
         'agency_name',
         'bio',
@@ -51,6 +58,50 @@ class User extends Authenticatable
     public function scopeAgents(Builder $query): Builder
     {
         return $query->where('role', self::ROLE_AGENT);
+    }
+
+    public function scopeApproved(Builder $query): Builder
+    {
+        return $query->where('approval_status', self::APPROVAL_APPROVED);
+    }
+
+    public function scopePendingApproval(Builder $query): Builder
+    {
+        return $query->where('approval_status', self::APPROVAL_PENDING);
+    }
+
+    public function requiresApproval(): bool
+    {
+        return in_array($this->role, [self::ROLE_AGENT, self::ROLE_OWNER], true);
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->approval_status === self::APPROVAL_APPROVED;
+    }
+
+    public function isPendingApproval(): bool
+    {
+        return $this->approval_status === self::APPROVAL_PENDING;
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->approval_status === self::APPROVAL_REJECTED;
+    }
+
+    public function approvalStatusLabel(): string
+    {
+        return config('users.approval_statuses.'.$this->approval_status, ucfirst($this->approval_status));
+    }
+
+    public function loginBlockedMessage(): string
+    {
+        if ($this->isRejected()) {
+            return 'Your account registration was not approved. Please contact support if you believe this is an error.';
+        }
+
+        return 'Your account is pending admin approval. You will be able to log in once an administrator approves your registration.';
     }
 
     public function isAdmin(): bool

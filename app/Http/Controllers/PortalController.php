@@ -19,6 +19,7 @@ class PortalController extends Controller
 
         $topAgentsQuery = User::query()
             ->agents()
+            ->approved()
             ->withCount([
                 'listings as published_sale_count' => function ($q) {
                     $q->where('status', 'published')->where('listing_kind', 'sale');
@@ -64,7 +65,7 @@ class PortalController extends Controller
 
     public function agentPortfolio(Request $request, User $agent)
     {
-        if (! $agent->isAgent()) {
+        if (! $agent->isAgent() || ! $agent->isApproved()) {
             abort(404);
         }
 

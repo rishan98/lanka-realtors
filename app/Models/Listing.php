@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Listing extends Model
@@ -129,6 +130,11 @@ class Listing extends Model
         return trim($this->land_size.($unit ? ' '.$unit : ''));
     }
 
+    public static function defaultImageUrl(): string
+    {
+        return asset('images/no-property-image.svg');
+    }
+
     public function allImagePaths(): array
     {
         $paths = $this->images ?? [];
@@ -139,19 +145,36 @@ class Listing extends Model
         return $paths;
     }
 
+    public function resolvedImagePaths(): array
+    {
+        return array_values(array_filter($this->allImagePaths(), function (string $path) {
+            return Storage::disk('public')->exists($path);
+        }));
+    }
+
+    public function hasImages(): bool
+    {
+        return count($this->resolvedImagePaths()) > 0;
+    }
+
     public function imageUrls(): array
     {
-        return array_map(fn ($path) => asset('storage/'.$path), $this->allImagePaths());
+        return array_map(
+            fn (string $path) => asset('storage/'.$path),
+            $this->resolvedImagePaths()
+        );
     }
 
     public function imageUrl(): string
     {
         $urls = $this->imageUrls();
-        if (! empty($urls)) {
-            return $urls[0];
-        }
 
-        return 'https://images.unsplash.com/photo-1600596542815-ffad4e153a9a?auto=format&fit=crop&w=1400&q=80';
+        return $urls[0] ?? self::defaultImageUrl();
+    }
+
+    public function cardImageClass(): string
+    {
+        return $this->hasImages() ? '' : 'property-card__image--placeholder';
     }
 
     public function priceShortLabel(): string

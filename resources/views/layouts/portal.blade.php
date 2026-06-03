@@ -24,7 +24,9 @@
                     <div class="header-actions">
                         @auth
                             <a href="{{ auth()->user()->dashboardRoute() }}" class="btn-outline-light btn--header-sm">Dashboard</a>
-                            <a class="btn-gold btn-gold--header" href="{{ auth()->user()->postListingRoute() }}">Post property</a>
+                            @unless(auth()->user()->isAdmin())
+                                <a class="btn-gold btn-gold--header" href="{{ auth()->user()->postListingRoute() }}">Post property</a>
+                            @endunless
                             <a class="btn-outline-light btn--header-sm" href="{{ route('logout') }}"
                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
                             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none">
@@ -40,15 +42,7 @@
                 </div>
             </div>
 
-            <nav class="nav nav--primary">
-                <a href="{{ route('listings.index', ['kind' => 'sale']) }}">Sales</a>
-                <a href="{{ route('listings.index', ['kind' => 'rental']) }}">Rental</a>
-                <a href="{{ route('listings.index', ['kind' => 'invest']) }}">Invest</a>
-                <a href="{{ route('listings.index', ['kind' => 'wanted']) }}">Wanted</a>
-                <a href="{{ route('locate') }}">Locate me</a>
-                <a href="{{ route('find-realtor') }}">Find realtor</a>
-                <a href="{{ route('grab-me') }}">Grab me</a>
-            </nav>
+            @include('components.primary-nav')
         </div>
     </header>
 
