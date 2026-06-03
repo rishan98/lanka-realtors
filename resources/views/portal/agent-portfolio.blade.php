@@ -3,9 +3,13 @@
 @section('title', $agent->name.' Portfolio — '.config('app.name'))
 
 @section('content')
-<section class="section section--tight">
-    <div class="container">
-        <nav class="listing-detail__breadcrumb" aria-label="Breadcrumb">
+@php($totalPublished = array_sum($kindCounts))
+
+<section class="agent-portfolio">
+    <div class="agent-portfolio__bg" aria-hidden="true"></div>
+
+    <div class="container agent-portfolio__container">
+        <nav class="agent-portfolio__breadcrumb" aria-label="Breadcrumb">
             <a href="{{ route('portal.home') }}">Home</a>
             <span aria-hidden="true">/</span>
             <a href="{{ route('find-realtor') }}">Agents</a>
@@ -13,48 +17,88 @@
             <span>{{ $agent->name }}</span>
         </nav>
 
-        <header class="section-top-viewed__header" style="margin-top:16px;">
-            <div>
-                <h1 class="section-top-viewed__title" style="margin-bottom:10px;">{{ $agent->name }}</h1>
-                <p class="muted mb-0">
-                    {{ $agent->companyDisplayName() }}
+        <header class="agent-portfolio__hero">
+            <div class="agent-portfolio__hero-main">
+                <p class="agent-portfolio__eyebrow">
+                    <span class="agent-portfolio__eyebrow-dot" aria-hidden="true"></span>
+                    Agent portfolio
+                </p>
+                <h1 class="agent-portfolio__title">{{ $agent->name }}</h1>
+                <p class="agent-portfolio__company">{{ $agent->companyDisplayName() }}</p>
+
+                <ul class="agent-portfolio__meta-list">
+                    @if($agent->is_preferred)
+                        <li><span class="agent-portfolio__badge">LR Preferred</span></li>
+                    @endif
                     @if($agent->operating_since_year)
-                        · Operating since {{ $agent->operating_since_year }}
+                        <li>Operating since <strong>{{ $agent->operating_since_year }}</strong></li>
                     @endif
                     @if($agent->buyers_served_estimate)
-                        · Buyers served {{ number_format($agent->buyers_served_estimate) }}+
+                        <li>Buyers served <strong>{{ number_format($agent->buyers_served_estimate) }}+</strong></li>
                     @endif
-                </p>
+                    <li><strong>{{ $totalPublished }}</strong> published {{ \Illuminate\Support\Str::plural('listing', $totalPublished) }}</li>
+                </ul>
             </div>
+
+            <figure class="agent-portfolio__photo">
+                <img src="{{ $agent->avatarUrl() }}" alt="{{ $agent->name }}" width="380" height="480" loading="eager" decoding="async">
+            </figure>
         </header>
 
-        <div class="listing-detail__section listing-detail__section--agent" style="padding-top:0;">
-            <div class="listing-detail__agent-card">
-                <x-agent-card :agent="$agent" />
-            </div>
-        </div>
-
         @if(!empty($agent->bio))
-            <section class="listing-detail__section" style="margin-top:18px;">
-                <h2 class="listing-detail__section-title">About {{ $agent->name }}</h2>
-                <p class="muted" style="line-height:1.65;">{{ $agent->bio }}</p>
+            <section class="agent-portfolio__bio glass glass--pad">
+                <h2 class="agent-portfolio__bio-title">About {{ $agent->name }}</h2>
+                <p class="agent-portfolio__bio-text">{{ $agent->bio }}</p>
             </section>
         @endif
 
-        <section class="listing-detail__section" style="margin-top:18px;">
-            <header class="section-top-viewed__header" style="border-bottom:none; margin-bottom: 16px; padding-bottom: 0;">
-                <h2 class="section-top-viewed__title" style="font-size:1.5rem;">Agent Ads</h2>
-                <span class="section-top-viewed__link" style="pointer-events:none;">
-                    {{ $listings->total() }} {{ \Illuminate\Support\Str::plural('listing', $listings->total()) }}
+        <section class="agent-portfolio__listings">
+            <header class="agent-portfolio__listings-head">
+                <div>
+                    <h2 class="agent-portfolio__listings-title">Listings</h2>
+                    <p class="agent-portfolio__listings-lead">Browse published properties from this agent.</p>
+                </div>
+                <span class="agent-portfolio__listings-count">
+                    {{ $listings->total() }} {{ \Illuminate\Support\Str::plural('result', $listings->total()) }}
                 </span>
             </header>
 
+            <nav class="agent-portfolio__filters" aria-label="Filter by listing type">
+                <a href="{{ route('agents.portfolio', $agent) }}"
+                   class="agent-portfolio__filter{{ empty($activeKind) ? ' is-active' : '' }}">
+                    All
+                    @if($totalPublished > 0)
+                        <span class="agent-portfolio__filter-count">{{ $totalPublished }}</span>
+                    @endif
+                </a>
+                @foreach($portfolioKinds as $kind)
+                    @php($meta = config('listing.kinds.'.$kind))
+                    <a href="{{ route('agents.portfolio', ['agent' => $agent, 'kind' => $kind]) }}"
+                       class="agent-portfolio__filter{{ $activeKind === $kind ? ' is-active' : '' }}">
+                        {{ $meta['nav_label'] ?? $meta['label'] }}
+                        @if(($kindCounts[$kind] ?? 0) > 0)
+                            <span class="agent-portfolio__filter-count">{{ $kindCounts[$kind] }}</span>
+                        @endif
+                    </a>
+                @endforeach
+            </nav>
+
             @if($listings->isEmpty())
-                <div class="block-gray">
-                    <p class="muted mb-0">No published ads from this agent yet.</p>
+                <div class="agent-portfolio__empty">
+                    <p class="agent-portfolio__empty-title">No listings to show</p>
+                    <p class="muted mb-0">
+                        @if($activeKind)
+                            No published {{ strtolower(config('listing.kinds.'.$activeKind.'.label', $activeKind)) }} ads from this agent yet.
+                        @else
+                            No published ads from this agent yet.
+                        @endif
+                    </p>
+                    @if($activeKind)
+                        <a class="btn-gold agent-portfolio__empty-btn" href="{{ route('agents.portfolio', $agent) }}">View all listings</a>
+                    @endif
                 </div>
             @else
-                <div class="card-grid card-grid--listings">
+                <div class="card-grid card-grid--listings agent-portfolio__grid">
                     @foreach($listings as $listing)
                         <article class="property-card">
                             <a href="{{ route('listings.show', $listing) }}">
@@ -73,16 +117,18 @@
                                     @endif
                                 </div>
                                 @if($listing->city)
-                                    <div class="muted mt-2" style="font-size:0.9rem">{{ $listing->city }}</div>
+                                    <div class="muted mt-2">{{ $listing->city }}</div>
                                 @endif
                             </div>
                         </article>
                     @endforeach
                 </div>
 
-                <div class="mt-3">
-                    {{ $listings->links() }}
-                </div>
+                @if($listings->hasPages())
+                    <div class="agent-portfolio__pagination">
+                        {{ $listings->links() }}
+                    </div>
+                @endif
             @endif
         </section>
     </div>

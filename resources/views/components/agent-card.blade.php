@@ -1,13 +1,17 @@
-@props(['agent'])
+@props(['agent', 'static' => false])
 
 @php($href = route('agents.portfolio', $agent))
 
+@if($static)
+<div class="mb-agent-card mb-agent-card--static">
+@else
 <a href="{{ $href }}" class="mb-agent-card" aria-label="View {{ $agent->name }} portfolio">
+@endif
     <div class="mb-agent-card__header">
         <img class="mb-agent-card__photo" src="{{ $agent->avatarUrl() }}" alt="{{ $agent->name }}">
         <div class="mb-agent-card__header-info">
             @if($agent->is_preferred)
-                <div class="mb-agent-card__preferred-text">MB Preferred</div>
+                <div class="mb-agent-card__preferred-text">LR Preferred</div>
             @endif
             <h3 class="mb-agent-card__name">{{ $agent->name }}</h3>
         </div>
@@ -40,4 +44,8 @@
             <div class="mb-agent-card__listing-label">Properties<br>for Rent</div>
         </div>
     </div>
+@if($static)
+</div>
+@else
 </a>
+@endif

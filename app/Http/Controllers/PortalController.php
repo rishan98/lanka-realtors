@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Listing;
 use App\Models\User;
+use App\Support\ListingRules;
+use Illuminate\Http\Request;
 
 class PortalController extends Controller
 {
@@ -60,11 +62,18 @@ class PortalController extends Controller
         ]);
     }
 
-    public function agentPortfolio(User $agent)
+    public function agentPortfolio(Request $request, User $agent)
     {
         if (! $agent->isAgent()) {
             abort(404);
         }
+
+        $portfolioKinds = ['sale', 'rental', 'invest', 'wanted'];
+
+        $activeKind = $request->filled('kind') && ListingRules::validKind($request->kind)
+            && in_array($request->kind, $portfolioKinds, true)
+            ? $request->kind
+            : null;
 
         $agent->loadCount([
             'listings as published_sale_count' => function ($q) {
@@ -75,14 +84,26 @@ class PortalController extends Controller
             },
         ]);
 
-        $listings = Listing::published()
-            ->where('user_id', $agent->id)
-            ->latest()
-            ->paginate(12);
+        $publishedBase = Listing::published()->where('user_id', $agent->id);
+
+        $kindCounts = [];
+        foreach ($portfolioKinds as $kind) {
+            $kindCounts[$kind] = (clone $publishedBase)->where('listing_kind', $kind)->count();
+        }
+
+        $listingsQuery = clone $publishedBase;
+        if ($activeKind) {
+            $listingsQuery->where('listing_kind', $activeKind);
+        }
+
+        $listings = $listingsQuery->latest()->paginate(9)->withQueryString();
 
         return view('portal.agent-portfolio', [
             'agent' => $agent,
             'listings' => $listings,
+            'activeKind' => $activeKind,
+            'kindCounts' => $kindCounts,
+            'portfolioKinds' => $portfolioKinds,
         ]);
     }
 }

@@ -722,7 +722,7 @@ img {
 .hero-search {
     position: relative;
     overflow: clip;
-    padding: clamp(44px, 7vw, 80px) 0 clamp(52px, 6vw, 72px);
+    padding: clamp(44px, 7vw, 40px) 0 clamp(52px, 6vw, 72px);
     background: linear-gradient(168deg, #e4eaf3 0%, #eef2f8 38%, #f4f6fb 72%, #eef1f5 100%);
 }
 
@@ -775,13 +775,39 @@ img {
         grid-column: 1;
         grid-row: 2;
         margin-top: 0;
-        align-self: start;
+        align-self: stretch;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .hero-search__agents {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .hero-search__agents .top-agent-card {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .hero-search__agents .top-agent-card--compact .top-agent-card__photo {
+        flex: 1 1 auto;
+        aspect-ratio: unset;
+        height: auto;
+        min-height: 0;
+    }
+
+    .hero-search__agents .top-agent-card--compact .top-agent-card__identity {
+        margin-top: 0;
+        flex-shrink: 0;
     }
 
     .hero-search__card-shell {
         grid-column: 2;
         grid-row: 2;
-        align-self: start;
+        align-self: stretch;
         margin-top: 0;
     }
 
@@ -827,6 +853,7 @@ img {
 .hero-search__agents .top-agent-card {
     flex: 1 1 0;
     min-width: 0;
+    min-height: 0;
 }
 
 .hero-search__agents .top-agent-card--compact .top-agent-card__link {
@@ -1148,6 +1175,13 @@ img {
 .mb-tab.is-active {
     color: var(--navy);
     background: rgba(201, 162, 39, 0.14);
+}
+
+a.mb-tab {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .mb-field-lg {
@@ -1952,8 +1986,14 @@ img {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .top-agent-card__link:hover {
+    .top-agent-card__link:hover,
+    .top-agent-card--compact .top-agent-card__link:hover {
         transform: none;
+    }
+
+    .top-agent-card--compact .top-agent-card__link:hover .top-agent-card__photo {
+        transform: none;
+        filter: none;
     }
 }
 
@@ -1962,10 +2002,14 @@ img {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(255, 255, 255, 0.95);
     border-radius: 24px;
     box-shadow: 0 8px 24px rgba(11, 27, 51, 0.04), 0 1px 0 inset rgba(255, 255, 255, 0.8);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition:
+        transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+        box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+        border-color 0.3s ease,
+        background 0.3s ease;
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -1975,28 +2019,23 @@ img {
     overflow: hidden;
 }
 
-.top-agent-card--compact .top-agent-card__link::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--gold), #f0d575, var(--gold));
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: 1;
-}
-
-.top-agent-card--compact .top-agent-card__link:hover::before {
-    opacity: 1;
-}
-
 .top-agent-card--compact .top-agent-card__link:hover {
-    transform: translateY(-6px);
-    background: rgba(255, 255, 255, 0.98);
-    box-shadow: 0 16px 36px rgba(11, 27, 51, 0.08), 0 1px 0 inset rgba(255, 255, 255, 1);
-    border-color: rgba(201, 162, 39, 0.3);
+    transform: translateY(-10px) scale(1.025);
+    background: #fff;
+    border-color: var(--gold);
+    box-shadow:
+        0 0 0 3px rgba(201, 162, 39, 0.28),
+        0 0 28px rgba(201, 162, 39, 0.42),
+        0 22px 52px rgba(11, 27, 51, 0.16),
+        0 1px 0 inset rgba(255, 255, 255, 1);
+}
+
+.top-agent-card--compact .top-agent-card__link:hover .top-agent-card__identity {
+    background: linear-gradient(180deg, rgba(201, 162, 39, 0.06) 0%, rgba(201, 162, 39, 0.16) 100%);
+}
+
+.top-agent-card--compact .top-agent-card__link:hover .top-agent-card__name {
+    color: #8a6f18;
 }
 
 .top-agent-card--compact .top-agent-card__header {
@@ -2021,12 +2060,13 @@ img {
     border: none;
     object-fit: cover;
     flex-shrink: 0;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, filter 0.3s ease;
     display: block;
 }
 
 .top-agent-card--compact .top-agent-card__link:hover .top-agent-card__photo {
-    transform: scale(1.03);
+    transform: scale(1.06);
+    filter: brightness(1.04) saturate(1.08);
 }
 
 .top-agent-card--compact .top-agent-card__identity {
@@ -2038,6 +2078,7 @@ img {
     width: 100%;
     padding: 12px 14px 14px;
     margin-top: auto;
+    transition: background 0.3s ease;
 }
 
 .top-agent-card--compact .top-agent-card__name {
@@ -2050,6 +2091,7 @@ img {
     text-overflow: ellipsis;
     line-height: 1.2;
     width: 100%;
+    transition: color 0.3s ease;
 }
 
 .top-agent-card--compact .top-agent-card__badge-label,
@@ -2915,4 +2957,329 @@ img {
 
 .listing-detail__similar-link:hover {
     text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   Agent portfolio page
+   -------------------------------------------------------------------------- */
+.agent-portfolio {
+    position: relative;
+    overflow: clip;
+    padding: clamp(32px, 5vw, 56px) 0 clamp(48px, 6vw, 72px);
+    background: linear-gradient(168deg, #e4eaf3 0%, #eef2f8 38%, var(--gray-soft) 100%);
+}
+
+.agent-portfolio__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 70% 50% at 12% -5%, rgba(201, 162, 39, 0.22), transparent 55%),
+        radial-gradient(ellipse 55% 45% at 88% 10%, rgba(11, 27, 51, 0.1), transparent 50%);
+}
+
+.agent-portfolio__container {
+    position: relative;
+    z-index: 1;
+}
+
+.agent-portfolio__breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 24px;
+    font-size: 0.88rem;
+    color: var(--muted);
+}
+
+.agent-portfolio__breadcrumb a {
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.agent-portfolio__breadcrumb a:hover {
+    color: var(--gold);
+}
+
+.agent-portfolio__hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+    gap: clamp(24px, 4vw, 40px);
+    align-items: start;
+    margin-bottom: clamp(28px, 4vw, 40px);
+}
+
+.agent-portfolio__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--navy);
+}
+
+.agent-portfolio__eyebrow-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), #8a6f18);
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.25);
+}
+
+.agent-portfolio__title {
+    margin: 0 0 8px;
+    font-size: clamp(1.85rem, 3.5vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--navy);
+}
+
+.agent-portfolio__company {
+    margin: 0 0 16px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.agent-portfolio__meta-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.92rem;
+    color: var(--muted);
+}
+
+.agent-portfolio__meta-list strong {
+    color: var(--navy);
+    font-weight: 700;
+}
+
+.agent-portfolio__badge {
+    display: inline-flex;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8a6f18;
+    background: rgba(201, 162, 39, 0.18);
+    border: 1px solid rgba(201, 162, 39, 0.35);
+}
+
+.agent-portfolio__photo {
+    margin: 0;
+    width: 100%;
+    max-width: 250px;
+    justify-self: end;
+    border-radius: 24px;
+    overflow: hidden;
+    background: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    box-shadow:
+        0 20px 48px rgba(11, 27, 51, 0.12),
+        0 0 0 1px rgba(11, 27, 51, 0.06);
+}
+
+.agent-portfolio__photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: center top;
+}
+
+.agent-portfolio__bio {
+    margin-bottom: clamp(28px, 4vw, 36px);
+}
+
+.agent-portfolio__bio-title {
+    margin: 0 0 12px;
+    padding-bottom: 10px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--navy);
+    border-bottom: 2px solid rgba(201, 162, 39, 0.35);
+}
+
+.agent-portfolio__bio-text {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+.agent-portfolio__listings {
+    padding: clamp(22px, 3vw, 32px);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+}
+
+.agent-portfolio__listings-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px 20px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.agent-portfolio__listings-title {
+    margin: 0 0 4px;
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--navy);
+}
+
+.agent-portfolio__listings-lead {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--muted);
+}
+
+.agent-portfolio__listings-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--navy);
+    background: rgba(201, 162, 39, 0.12);
+    border: 1px solid rgba(201, 162, 39, 0.25);
+    white-space: nowrap;
+}
+
+.agent-portfolio__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding: 10px;
+    border-radius: 14px;
+    background: rgba(11, 27, 51, 0.04);
+}
+
+.agent-portfolio__filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    background: transparent;
+    border: 1px solid transparent;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.agent-portfolio__filter:hover {
+    color: var(--navy);
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.agent-portfolio__filter.is-active {
+    color: var(--navy);
+    background: #fff;
+    border-color: rgba(201, 162, 39, 0.35);
+    box-shadow: 0 4px 14px rgba(201, 162, 39, 0.18);
+}
+
+.agent-portfolio__filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4em;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--muted);
+    background: rgba(11, 27, 51, 0.06);
+}
+
+.agent-portfolio__filter.is-active .agent-portfolio__filter-count {
+    color: #8a6f18;
+    background: rgba(201, 162, 39, 0.2);
+}
+
+.agent-portfolio__grid {
+    margin-top: 4px;
+}
+
+.agent-portfolio__empty {
+    text-align: center;
+    padding: clamp(32px, 5vw, 48px) 24px;
+    border-radius: var(--radius);
+    background: rgba(11, 27, 51, 0.03);
+    border: 1px dashed rgba(11, 27, 51, 0.12);
+}
+
+.agent-portfolio__empty-title {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.agent-portfolio__empty-btn {
+    margin-top: 18px;
+}
+
+.agent-portfolio__pagination {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 900px) {
+    .agent-portfolio__hero {
+        grid-template-columns: 1fr;
+    }
+
+    .agent-portfolio__photo {
+        justify-self: start;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 560px) {
+    .agent-portfolio__filters {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        padding-bottom: 6px;
+    }
+
+    .agent-portfolio__filter {
+        flex-shrink: 0;
+    }
+
+    .agent-portfolio__listings-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }
