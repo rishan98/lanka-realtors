@@ -1,6 +1,8 @@
 @extends('layouts.portal')
 
 @section('title', 'Find a realtor — '.config('app.name'))
+@section('meta_description', 'Find verified real estate agents in Sri Lanka. Compare agents by active listings, ratings, and portfolio before you reach out.')
+@section('canonical', route('find-realtor'))
 
 @section('content')
 <section class="section section--tight">

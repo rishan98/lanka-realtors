@@ -38,10 +38,10 @@ class ListingValidation
                 : 'nullable|string';
         }
 
-        if (in_array('city', $kindFields, true)) {
-            $rules['city'] = in_array('city', $requiredFields, true)
-                ? 'required|string|max:120'
-                : 'nullable|string|max:120';
+        if (in_array('city_id', $kindFields, true)) {
+            $rules['city_id'] = in_array('city_id', $requiredFields, true)
+                ? ['required', 'integer', Rule::exists('cities', 'id')->where(fn ($query) => $query->where('is_active', true)->whereNotNull('parent_id'))]
+                : ['nullable', 'integer', Rule::exists('cities', 'id')->where(fn ($query) => $query->where('is_active', true)->whereNotNull('parent_id'))];
         }
 
         if (in_array('contact_number', $kindFields, true)) {

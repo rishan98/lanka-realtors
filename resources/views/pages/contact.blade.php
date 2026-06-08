@@ -1,6 +1,8 @@
 @extends('layouts.portal')
 
 @section('title', 'Contact us — '.config('app.name'))
+@section('meta_description', 'Contact Lanka Realtors for property enquiries, agent partnerships, or listing support. We respond within one business day.')
+@section('canonical', route('contact'))
 
 @section('content')
 <section class="section section--tight site-page">

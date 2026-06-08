@@ -22,6 +22,7 @@
         <table class="table-form data-table" style="min-width:720px;width:100%">
             <thead>
                 <tr>
+                    <th style="width:72px">Photo</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Role</th>
@@ -34,6 +35,17 @@
             <tbody>
                 @foreach($pending as $user)
                     <tr>
+                        <td>
+                            <img
+                                class="admin-user-avatar"
+                                src="{{ $user->avatarUrl() }}"
+                                alt="{{ $user->name }}"
+                                width="48"
+                                height="48"
+                                loading="lazy"
+                                decoding="async"
+                            >
+                        </td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
                         <td><span class="pill">{{ $user->roleLabel() }}</span></td>

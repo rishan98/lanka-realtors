@@ -91,16 +91,16 @@ return [
     ],
 
     'kind_fields' => [
-        'sale' => ['city', 'latitude', 'longitude', 'bedrooms', 'bathrooms', 'land_size', 'land_size_unit', 'built_area_sqft', 'price', 'floors', 'furnishing_status', 'parking_available', 'title', 'description', 'contact_number', 'images'],
-        'rental' => ['city', 'latitude', 'longitude', 'bedrooms', 'bathrooms', 'land_size', 'land_size_unit', 'built_area_sqft', 'price', 'floors', 'furnishing_status', 'parking_available', 'title', 'description', 'contact_number', 'images', 'advance_payment_months', 'deposit_months', 'short_term_available', 'bills_included'],
-        'invest' => ['city', 'latitude', 'longitude', 'bedrooms', 'bathrooms', 'land_size', 'land_size_unit', 'built_area_sqft', 'price', 'floors', 'furnishing_status', 'parking_available', 'title', 'description', 'contact_number', 'images'],
-        'wanted' => ['city', 'title', 'description', 'contact_number'],
+        'sale' => ['city_id', 'latitude', 'longitude', 'bedrooms', 'bathrooms', 'land_size', 'land_size_unit', 'built_area_sqft', 'price', 'floors', 'furnishing_status', 'parking_available', 'title', 'description', 'contact_number', 'images'],
+        'rental' => ['city_id', 'latitude', 'longitude', 'bedrooms', 'bathrooms', 'land_size', 'land_size_unit', 'built_area_sqft', 'price', 'floors', 'furnishing_status', 'parking_available', 'title', 'description', 'contact_number', 'images', 'advance_payment_months', 'deposit_months', 'short_term_available', 'bills_included'],
+        'invest' => ['city_id', 'latitude', 'longitude', 'bedrooms', 'bathrooms', 'land_size', 'land_size_unit', 'built_area_sqft', 'price', 'floors', 'furnishing_status', 'parking_available', 'title', 'description', 'contact_number', 'images'],
+        'wanted' => ['city_id', 'title', 'description', 'contact_number'],
     ],
 
     'required_fields' => [
-        'sale' => ['city', 'bedrooms', 'title', 'description', 'contact_number', 'images'],
-        'rental' => ['city', 'bedrooms', 'title', 'description', 'contact_number', 'images'],
-        'invest' => ['city', 'bedrooms', 'title', 'description', 'contact_number', 'images'],
-        'wanted' => ['city', 'title', 'description', 'contact_number'],
+        'sale' => ['city_id', 'bedrooms', 'title', 'description', 'contact_number', 'images'],
+        'rental' => ['city_id', 'bedrooms', 'title', 'description', 'contact_number', 'images'],
+        'invest' => ['city_id', 'bedrooms', 'title', 'description', 'contact_number', 'images'],
+        'wanted' => ['city_id', 'title', 'description', 'contact_number'],
     ],
 ];

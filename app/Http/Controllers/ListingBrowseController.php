@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\City;
 use App\Models\Listing;
 use App\Support\ListingRules;
+use App\Support\Seo;
 use Illuminate\Http\Request;
 
 class ListingBrowseController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Listing::published()->with('user');
+        $query = Listing::published()->with(['user', 'cityRelation']);
 
         if ($request->filled('q')) {
             $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $request->q).'%';
@@ -18,13 +20,21 @@ class ListingBrowseController extends Controller
                 $q->where('title', 'like', $term)
                     ->orWhere('description', 'like', $term)
                     ->orWhere('city', 'like', $term)
-                    ->orWhere('area', 'like', $term);
+                    ->orWhere('area', 'like', $term)
+                    ->orWhereHas('cityRelation', function ($cityQuery) use ($term) {
+                        $cityQuery->where('name', 'like', $term);
+                    });
             });
         }
 
         if ($request->filled('city')) {
-            $city = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $request->city).'%';
-            $query->where('city', 'like', $city);
+            $resolvedCity = City::resolveFilter((string) $request->city);
+            if ($resolvedCity) {
+                $query->whereIn('city_id', $resolvedCity->filterCityIds());
+            } else {
+                $city = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $request->city).'%';
+                $query->where('city', 'like', $city);
+            }
         }
 
         if ($request->filled('quick')) {
@@ -43,15 +53,21 @@ class ListingBrowseController extends Controller
 
         $listings = $query->latest()->paginate(12)->withQueryString();
 
+        $filters = $request->only([
+            'q', 'city', 'kind', 'subtype', 'quick',
+            'price_min', 'price_max', 'area_min', 'area_max', 'bhk',
+        ]);
+        $kinds = config('listing.kinds');
+        $districts = City::districtsForForms();
+
         return view('listings.index', [
             'listings' => $listings,
-            'kinds' => config('listing.kinds'),
-            'filters' => $request->only([
-                'q', 'city', 'kind', 'subtype', 'quick',
-                'price_min', 'price_max', 'area_min', 'area_max', 'bhk',
-            ]),
+            'kinds' => $kinds,
+            'districts' => $districts,
+            'filters' => $filters,
             'budget_presets' => config('portal.budget_presets_lkr', []),
             'sqft_presets' => config('portal.sqft_presets', []),
+            'seo' => Seo::listingIndex($filters, $kinds),
         ]);
     }
 
@@ -72,19 +88,12 @@ class ListingBrowseController extends Controller
             ]);
         }]);
 
-        $similarQuery = Listing::published()
-            ->where('id', '!=', $listing->id)
-            ->where('listing_kind', $listing->listing_kind);
-
-        if ($listing->city) {
-            $similarQuery->where('city', $listing->city);
-        }
-
-        $similarListings = $similarQuery->latest()->take(4)->get();
+        $similarListings = Listing::similarTo($listing, 4);
 
         return view('listings.show', [
             'listing' => $listing,
             'similarListings' => $similarListings,
+            'seo' => Seo::listingShow($listing),
         ]);
     }
 

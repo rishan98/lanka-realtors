@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\AgentController;
+use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\ContactInquiryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserApprovalController;
@@ -12,10 +14,12 @@ use App\Http\Controllers\ListingBrowseController;
 use App\Http\Controllers\LocateController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\SitePageController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PortalController::class, 'index'])->name('portal.home');
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
 Route::get('/listings', [ListingBrowseController::class, 'index'])->name('listings.index');
 Route::get('/listings/{listing}', [ListingBrowseController::class, 'show'])->name('listings.show');
@@ -43,6 +47,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('users/pending', [UserApprovalController::class, 'index'])->name('users.pending');
     Route::post('users/{user}/approve', [UserApprovalController::class, 'approve'])->name('users.approve');
     Route::post('users/{user}/reject', [UserApprovalController::class, 'reject'])->name('users.reject');
+    Route::get('agents', [AgentController::class, 'index'])->name('agents.index');
+    Route::patch('agents/{user}/rating', [AgentController::class, 'updateRating'])->name('agents.rating');
+    Route::resource('cities', CityController::class)->except(['show']);
     Route::get('contact-inquiries', [ContactInquiryController::class, 'index'])->name('contact-inquiries.index');
     Route::get('contact-inquiries/{contactInquiry}', [ContactInquiryController::class, 'show'])->name('contact-inquiries.show');
 });

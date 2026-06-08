@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Agent;
 
 use App\Http\Controllers\Controller;
+use App\Models\City;
 use App\Models\Listing;
 use App\Support\ListingValidation;
 use Illuminate\Http\Request;
@@ -36,6 +37,7 @@ class ListingController extends Controller
         return view('agent.listings.create', [
             'kinds' => config('listing.kinds'),
             'listing' => new Listing,
+            'districts' => City::districtsForForms(),
             'furnishingOptions' => config('listing.furnishing_options'),
             'landSizeUnits' => config('listing.land_size_units'),
             'maxImages' => config('listing.max_images', 10),
@@ -70,6 +72,7 @@ class ListingController extends Controller
         return view('agent.listings.edit', [
             'listing' => $listing,
             'kinds' => config('listing.kinds'),
+            'districts' => City::districtsForForms($listing->city_id),
             'furnishingOptions' => config('listing.furnishing_options'),
             'landSizeUnits' => config('listing.land_size_units'),
             'maxImages' => config('listing.max_images', 10),

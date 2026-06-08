@@ -26,16 +26,8 @@ class SitePageController extends Controller
         $agents = User::query()
             ->agents()
             ->approved()
-            ->withCount([
-                'listings as published_sale_count' => function ($q) {
-                    $q->where('status', 'published')->where('listing_kind', 'sale');
-                },
-                'listings as published_rent_count' => function ($q) {
-                    $q->where('status', 'published')->where('listing_kind', 'rental');
-                },
-            ])
-            ->orderByDesc('is_preferred')
-            ->orderByRaw('(COALESCE(published_sale_count, 0) + COALESCE(published_rent_count, 0)) DESC')
+            ->withPublishedListingCounts()
+            ->orderedByRating()
             ->get();
 
         return view('pages.find-realtor', compact('agents'));

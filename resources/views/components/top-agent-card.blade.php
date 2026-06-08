@@ -9,6 +9,9 @@
         @if($compact)
             <img class="top-agent-card__photo" src="{{ $agent->avatarUrl() }}" alt="">
             <div class="top-agent-card__identity">
+                @if($agent->hasRating())
+                    <span class="top-agent-card__rating">{{ $agent->formattedRating() }} ★</span>
+                @endif
                 <h3 class="top-agent-card__name">{{ $agent->name }}</h3>
             </div>
         @else
@@ -22,13 +25,11 @@
                     @endif
                     <h3 class="top-agent-card__name">{{ $agent->name }}</h3>
                 </div>
-                @if($agent->is_preferred)
-                    <span class="top-agent-card__medal" title="Preferred agent" aria-hidden="true">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <circle cx="12" cy="9" r="6" fill="#c9a227" stroke="#a9861c" stroke-width="1"/>
-                            <path d="M8 14l-2 8 6-3 6 3-2-8" fill="#c0392b" stroke="#922b21" stroke-width="0.5"/>
-                        </svg>
-                    </span>
+                @if($agent->hasRating())
+                    <div class="top-agent-card__rating-badge" aria-label="Rating {{ $agent->formattedRating() }} out of 5">
+                        <span class="top-agent-card__rating-value">{{ $agent->formattedRating() }}</span>
+                        <span class="top-agent-card__rating-star" aria-hidden="true">★</span>
+                    </div>
                 @endif
             </header>
 

@@ -350,3 +350,56 @@
         grid-template-columns: 1fr;
     }
 }
+
+.agent-listings-table td {
+    vertical-align: middle;
+}
+
+.agent-listings-table__photo {
+    display: block;
+    width: 72px;
+    height: 54px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(11, 27, 51, 0.08);
+    background: #f1f5f9;
+}
+
+.agent-listings-table__photo.property-card__image--placeholder {
+    object-fit: contain;
+    padding: 8px;
+    background: #eef2f7;
+}
+
+.agent-listings-table__title {
+    color: #0b1b33;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.agent-listings-table__title:hover {
+    color: #8a6f18;
+}
+
+.agent-listings-table__actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.agent-listings-table__delete-form {
+    display: inline;
+    margin: 0;
+}
+
+.agent-listings-table__delete {
+    color: #b91c1c;
+    border-color: rgba(185, 28, 28, 0.25);
+    cursor: pointer;
+    font: inherit;
+}
+
+.agent-listings-table__delete:hover {
+    background: rgba(185, 28, 28, 0.08);
+}

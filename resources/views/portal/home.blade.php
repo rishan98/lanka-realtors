@@ -1,6 +1,8 @@
 @extends('layouts.portal')
 
 @section('title', 'Buy, Rent & Sell Property in Sri Lanka — '.config('app.name'))
+@section('meta_description', config('portal.seo.default_description'))
+@section('canonical', route('portal.home'))
 
 @section('content')
 <section class="hero-search">
@@ -13,7 +15,7 @@
                 <span class="hero-search__eyebrow-dot"></span>
                 {{ $portal['tagline'] ?? 'Find your next address.' }}
             </p>
-            <h1 class="hero-search__title">Search properties like a <span class="hero-search__title-accent">pro.</span></h1>
+            <h1 class="hero-search__title">Search Properties with <span class="hero-search__title-accent">Realtor Expertise</span></h1>
         </div>
 
         <div class="hero-search__agents-wrap">
@@ -51,7 +53,7 @@
                 <div class="search-row mb-row-tight">
                     <div class="field">
                         <label for="city">City (optional)</label>
-                        <input class="input" id="city" name="city" type="text" placeholder="Refine by city" value="{{ request('city') }}">
+                        <x-city-filter-select id="city" name="city" :selected="request('city', '')" :districts="$districts" />
                     </div>
                     <div class="field">
                         <label class="field-label" style="opacity:0">Search</label>
@@ -141,37 +143,7 @@
         @else
             <div class="modern-property-grid">
                 @foreach($featured as $listing)
-                    <a href="{{ route('listings.show', $listing) }}" class="modern-property-card">
-                        <div class="modern-property-card__image-wrap">
-                            <img class="modern-property-card__image {{ $listing->cardImageClass() }}" src="{{ $listing->imageUrl() }}" alt="{{ $listing->title }}" loading="lazy" onerror="this.onerror=null;this.src='{{ \App\Models\Listing::defaultImageUrl() }}';this.classList.add('property-card__image--placeholder');">
-                            <div class="modern-property-card__photo-count">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                                {{ rand(4, 15) }}
-                            </div>
-                        </div>
-                        <div class="modern-property-card__content">
-                            <div class="modern-property-card__meta">
-                                {{ $listing->bedrooms ? $listing->bedrooms . ' BHK ' : '' }}{{ $listing->subtypeLabel() }}
-                            </div>
-                            <div class="modern-property-card__price-row">
-                                @if($listing->price)
-                                    {{ $listing->currency }} {{ number_format($listing->price, 0) }}
-                                @else
-                                    POA
-                                @endif
-                                @if($listing->land_size)
-                                    <span class="modern-property-card__price-divider">|</span>
-                                    {{ $listing->land_size }} sqft
-                                @endif
-                            </div>
-                            <div class="modern-property-card__location">
-                                {{ $listing->city }}@if($listing->area), {{ $listing->area }} @endif
-                            </div>
-                            <div class="modern-property-card__status">
-                                Ready to Move
-                            </div>
-                        </div>
-                    </a>
+                    <x-modern-property-card :listing="$listing" />
                 @endforeach
             </div>
         @endif
@@ -270,31 +242,7 @@
         @else
             <div class="mb-corridor-slider">
                 @foreach($investListings as $listing)
-                    @php($secondary = $listing->investSecondaryStat())
-                    <a href="{{ route('listings.show', $listing) }}" class="mb-corridor-card">
-                        <img src="{{ $listing->imageUrl() }}" class="mb-corridor-card__image {{ $listing->cardImageClass() }}" alt="{{ $listing->title }}" loading="lazy" onerror="this.onerror=null;this.src='{{ \App\Models\Listing::defaultImageUrl() }}';this.classList.add('property-card__image--placeholder');">
-                        <div class="mb-corridor-card__body">
-                            <h3 class="mb-corridor-card__title">{{ $listing->title }}</h3>
-                            <ul class="mb-corridor-card__list">
-                                @foreach($listing->investHighlightLines() as $point)
-                                    <li class="mb-corridor-card__list-item">
-                                        <svg class="mb-corridor-card__list-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                                        {{ $point }}
-                                    </li>
-                                @endforeach
-                            </ul>
-                            <div class="mb-corridor-card__footer">
-                                <div class="mb-corridor-card__stat">
-                                    <span class="mb-corridor-card__stat-value">{{ $listing->priceShortLabel() }}</span>
-                                    <span class="mb-corridor-card__stat-label">{{ $listing->investPriceFootnote() }}</span>
-                                </div>
-                                <div class="mb-corridor-card__stat">
-                                    <span class="mb-corridor-card__stat-value">{{ $secondary['value'] }}</span>
-                                    <span class="mb-corridor-card__stat-label">{{ $secondary['label'] }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
+                    <x-invest-corridor-card :listing="$listing" />
                 @endforeach
             </div>
         @endif

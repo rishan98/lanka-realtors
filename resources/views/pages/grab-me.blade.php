@@ -1,6 +1,8 @@
 @extends('layouts.portal')
 
 @section('title', 'Grab me — list your property — '.config('app.name'))
+@section('meta_description', 'List your property on Lanka Realtors or connect with a professional agent to market your home, land, or rental in Sri Lanka.')
+@section('canonical', route('grab-me'))
 
 @section('content')
 <section class="section section--tight">

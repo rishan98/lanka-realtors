@@ -36,6 +36,7 @@ class UserSeeder extends Seeder
                 'operating_since_year' => 2012,
                 'buyers_served_estimate' => 340,
                 'is_preferred' => true,
+                'rating' => 4.9,
             ],
             [
                 'email' => 'sanduni.fernando@seed.test',
@@ -46,6 +47,7 @@ class UserSeeder extends Seeder
                 'operating_since_year' => 2015,
                 'buyers_served_estimate' => 210,
                 'is_preferred' => true,
+                'rating' => 4.7,
             ],
             [
                 'email' => 'ravi.silva@seed.test',
@@ -56,6 +58,7 @@ class UserSeeder extends Seeder
                 'operating_since_year' => 2010,
                 'buyers_served_estimate' => 185,
                 'is_preferred' => true,
+                'rating' => 4.5,
             ],
             [
                 'email' => 'anuki.jayawardena@seed.test',
@@ -66,6 +69,7 @@ class UserSeeder extends Seeder
                 'operating_since_year' => 2016,
                 'buyers_served_estimate' => 95,
                 'is_preferred' => false,
+                'rating' => 4.2,
             ],
             [
                 'email' => 'dilan.rathnayake@seed.test',
@@ -76,6 +80,7 @@ class UserSeeder extends Seeder
                 'operating_since_year' => 2014,
                 'buyers_served_estimate' => 120,
                 'is_preferred' => false,
+                'rating' => 4.0,
             ],
             [
                 'email' => 'tharushi.wickramasinghe@seed.test',
@@ -86,12 +91,14 @@ class UserSeeder extends Seeder
                 'operating_since_year' => 2019,
                 'buyers_served_estimate' => 68,
                 'is_preferred' => false,
+                'rating' => 3.8,
             ],
         ];
 
         foreach ($agents as $agent) {
             $preferred = $agent['is_preferred'];
-            unset($agent['is_preferred']);
+            $rating = $agent['rating'] ?? null;
+            unset($agent['is_preferred'], $agent['rating']);
 
             $user = User::updateOrCreate(
                 ['email' => $agent['email']],
@@ -100,6 +107,7 @@ class UserSeeder extends Seeder
                     'role' => User::ROLE_AGENT,
                     'approval_status' => User::APPROVAL_APPROVED,
                     'email_verified_at' => now(),
+                    'rating' => $rating,
                 ])
             );
 

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\City;
 use App\Models\Listing;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -9,14 +10,14 @@ use Illuminate\Database\Seeder;
 class ListingSeeder extends Seeder
 {
     protected $locations = [
-        ['city' => 'Colombo', 'area' => 'Bambalapitiya', 'lat' => 6.8881, 'lng' => 79.8607],
-        ['city' => 'Colombo', 'area' => 'Nugegoda', 'lat' => 6.8649, 'lng' => 79.8997],
-        ['city' => 'Colombo', 'area' => 'Dehiwala', 'lat' => 6.8561, 'lng' => 79.8612],
-        ['city' => 'Mount Lavinia', 'area' => 'Beach Road', 'lat' => 6.8380, 'lng' => 79.8636],
-        ['city' => 'Kandy', 'area' => 'Peradeniya', 'lat' => 7.2718, 'lng' => 80.5956],
-        ['city' => 'Galle', 'area' => 'Fort', 'lat' => 6.0329, 'lng' => 80.2170],
-        ['city' => 'Negombo', 'area' => 'Lewis Place', 'lat' => 7.2088, 'lng' => 79.8358],
-        ['city' => 'Ja-Ela', 'area' => 'Town', 'lat' => 7.0748, 'lng' => 79.8910],
+        ['area' => 'Bambalapitiya', 'locality' => 'Bambalapitiya', 'lat' => 6.8881, 'lng' => 79.8607],
+        ['area' => 'Nugegoda', 'locality' => 'Nugegoda', 'lat' => 6.8649, 'lng' => 79.8997],
+        ['area' => 'Dehiwala', 'locality' => 'Dehiwala', 'lat' => 6.8561, 'lng' => 79.8612],
+        ['area' => 'Mount Lavinia', 'locality' => 'Beach Road', 'lat' => 6.8380, 'lng' => 79.8636],
+        ['area' => 'Peradeniya', 'locality' => 'Peradeniya', 'lat' => 7.2718, 'lng' => 80.5956],
+        ['area' => 'Galle Fort', 'locality' => 'Fort', 'lat' => 6.0329, 'lng' => 80.2170],
+        ['area' => 'Negombo', 'locality' => 'Lewis Place', 'lat' => 7.2088, 'lng' => 79.8358],
+        ['area' => 'Ja-Ela', 'locality' => 'Town', 'lat' => 7.0748, 'lng' => 79.8910],
     ];
 
     public function run()
@@ -65,10 +66,17 @@ class ListingSeeder extends Seeder
 
     protected function baseLocation(array $loc, User $user): array
     {
+        $city = City::query()
+            ->where('name', $loc['area'])
+            ->whereNotNull('parent_id')
+            ->with('parent')
+            ->first();
+
         return [
             'user_id' => $user->id,
-            'city' => $loc['city'],
-            'area' => $loc['area'],
+            'city_id' => $city?->id,
+            'city' => $city ? $city->listingLabel() : $loc['area'],
+            'area' => $loc['locality'],
             'latitude' => $loc['lat'] + (mt_rand(-50, 50) / 10000),
             'longitude' => $loc['lng'] + (mt_rand(-50, 50) / 10000),
             'currency' => 'LKR',
@@ -233,9 +241,6 @@ class ListingSeeder extends Seeder
 
     protected function description(string $title, string $kind): string
     {
-        $kindLabel = config('listing.kinds.'.$kind.'.label', $kind);
-
-        return $title.'. Listed as '.$kindLabel.' on Lanka Realtors. '
-            .'Contact the poster for viewings. All details are sample seed data for development and demos.';
+        return $title;
     }
 }

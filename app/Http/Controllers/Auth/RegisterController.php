@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class RegisterController extends Controller
 {
@@ -47,23 +49,55 @@ class RegisterController extends Controller
 
         if ($role === User::ROLE_AGENT) {
             $rules['agency_name'] = ['nullable', 'string', 'max:255'];
+            $rules['avatar'] = ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'];
         }
 
         return Validator::make($data, $rules);
     }
 
-    protected function create(array $data)
+    public function register(Request $request)
     {
+        $this->validator($request->all())->validate();
+
+        $user = $this->createUser($request);
+
+        event(new Registered($user));
+
+        $this->guard()->login($user);
+
+        if ($response = $this->registered($request, $user)) {
+            return $response;
+        }
+
+        return redirect($this->redirectPath());
+    }
+
+    protected function createUser(Request $request): User
+    {
+        $role = $request->input('role', User::ROLE_AGENT);
+        $avatarPath = null;
+
+        if ($role === User::ROLE_AGENT && $request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('agents/avatars', 'public');
+        }
+
+        if ($role === User::ROLE_AGENT && ! $avatarPath) {
+            throw ValidationException::withMessages([
+                'avatar' => 'Please upload a profile photo to register as an agent.',
+            ]);
+        }
+
         return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'role' => $data['role'],
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => Hash::make($request->input('password')),
+            'role' => $role,
             'approval_status' => User::APPROVAL_PENDING,
-            'phone' => $data['phone'] ?? null,
-            'agency_name' => ($data['role'] ?? User::ROLE_AGENT) === User::ROLE_AGENT
-                ? ($data['agency_name'] ?? null)
+            'phone' => $request->input('phone'),
+            'agency_name' => $role === User::ROLE_AGENT
+                ? $request->input('agency_name')
                 : null,
+            'avatar_path' => $avatarPath,
         ]);
     }
 

@@ -37,7 +37,8 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
+            // Real folder under public/ — works on shared hosting without `storage:link`.
+            'root' => public_path('storage'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
         ],
@@ -66,8 +67,10 @@ return [
     |
     */
 
-    'links' => [
-        public_path('storage') => storage_path('app/public'),
-    ],
+    /*
+    | Shared hosting (Hostinger, etc.) disables symlink(). Uploads use public/storage
+    | directly — do not rely on storage:link. Run: php artisan storage:publish-public
+    */
+    'links' => [],
 
 ];

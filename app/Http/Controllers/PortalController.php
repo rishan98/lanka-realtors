@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\City;
 use App\Models\Listing;
 use App\Models\User;
 use App\Support\ListingRules;
+use App\Support\Seo;
 use Illuminate\Http\Request;
 
 class PortalController extends Controller
@@ -20,28 +22,11 @@ class PortalController extends Controller
         $topAgentsQuery = User::query()
             ->agents()
             ->approved()
-            ->withCount([
-                'listings as published_sale_count' => function ($q) {
-                    $q->where('status', 'published')->where('listing_kind', 'sale');
-                },
-                'listings as published_rent_count' => function ($q) {
-                    $q->where('status', 'published')->where('listing_kind', 'rental');
-                },
-            ])
-            ->orderByDesc('is_preferred')
-            ->orderByRaw('(COALESCE(published_sale_count, 0) + COALESCE(published_rent_count, 0)) DESC');
+            ->withPublishedListingCounts()
+            ->orderedByRating();
 
-        $heroTopAgents = $topAgentsQuery->take(3)->get();
-
-        // Ensure we have 3 agents to display the layout nicely.
-        if ($heroTopAgents->count() > 0 && $heroTopAgents->count() < 3) {
-            $filler = $heroTopAgents->first();
-            while($heroTopAgents->count() < 3) {
-                $heroTopAgents->push($filler);
-            }
-        }
-
-        $topAgents = $topAgentsQuery->take(4)->get();
+        $heroTopAgents = (clone $topAgentsQuery)->take(3)->get();
+        $topAgents = (clone $topAgentsQuery)->take(4)->get();
 
         $investListings = Listing::published()
             ->where('listing_kind', 'invest')
@@ -55,6 +40,7 @@ class PortalController extends Controller
             'heroTopAgents' => $heroTopAgents,
             'topAgents' => $topAgents,
             'investListings' => $investListings,
+            'districts' => City::districtsForForms(),
             'kinds' => config('listing.kinds'),
             'quick' => config('listing.homepage_quick'),
             'portal' => config('portal'),
@@ -105,6 +91,7 @@ class PortalController extends Controller
             'activeKind' => $activeKind,
             'kindCounts' => $kindCounts,
             'portfolioKinds' => $portfolioKinds,
+            'seo' => Seo::agentPortfolio($agent, $activeKind),
         ]);
     }
 }

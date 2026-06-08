@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#eef1f5">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name'))</title>
+    @include('partials.seo')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&display=swap" rel="stylesheet">
@@ -18,7 +19,7 @@
             <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-hidden="true">
 
             <div class="site-header__bar">
-                <a class="brand" href="{{ route('portal.home') }}">Lanka <em>Realtors</em></a>
+                <x-site-logo />
 
                 <div class="site-header__bar-end">
                     <div class="header-actions">

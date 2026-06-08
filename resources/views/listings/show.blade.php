@@ -1,6 +1,24 @@
 ﻿@extends('layouts.portal')
 
-@section('title', $listing->displayHeadline().' — '.config('app.name'))
+@section('title', $seo['title'])
+@section('meta_description', $seo['description'])
+@section('canonical', $seo['canonical'])
+@section('og_image', $seo['image'])
+@section('og_type', 'product')
+
+@push('head')
+<script type="application/ld+json">
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'RealEstateListing',
+    'name' => $listing->title,
+    'description' => \Illuminate\Support\Str::limit(strip_tags((string) $listing->description), 300, ''),
+    'url' => route('listings.show', $listing),
+    'image' => $listing->imageUrl(),
+    'datePosted' => $listing->created_at->toAtomString(),
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+</script>
+@endpush
 
 @section('content')
 @php
@@ -32,7 +50,7 @@
             <div class="listing-detail__main">
                 <div class="listing-detail__head">
                     <div class="listing-detail__price listing-detail__price--mobile">{{ $listing->formattedPriceDisplay() }}</div>
-                    <h1 class="listing-detail__title">{{ $listing->displayHeadline() }}</h1>
+                    <h1 class="listing-detail__title">{{ $listing->title }}</h1>
                     @if($listing->area || $listing->city)
                         <p class="listing-detail__location">
                             @if($listing->area){{ $listing->area }}@endif
@@ -154,38 +172,22 @@
             </aside>
         </div>
 
-        @if($similarListings->isNotEmpty())
-            <section class="listing-detail__similar">
-                <header class="listing-detail__similar-header">
-                    <h2 class="listing-detail__section-title">Similar properties nearby</h2>
-                    <a href="{{ route('listings.index', array_filter(['kind' => $listing->listing_kind, 'city' => $listing->city])) }}" class="listing-detail__similar-link">View all &rarr;</a>
-                </header>
+        <section class="listing-detail__similar">
+            <header class="listing-detail__similar-header">
+                <h2 class="listing-detail__section-title">Similar properties</h2>
+                <a href="{{ route('listings.index', array_filter(['kind' => $listing->listing_kind, 'city' => $listing->city, 'subtype' => $listing->property_subtype])) }}" class="listing-detail__similar-link">View all &rarr;</a>
+            </header>
+
+            @if($similarListings->isEmpty())
+                <p class="listing-detail__similar-empty muted mb-0">No similar listings right now. <a href="{{ route('listings.index', ['kind' => $listing->listing_kind]) }}">Browse more {{ $listing->kindLabel() }} properties</a>.</p>
+            @else
                 <div class="modern-property-grid">
                     @foreach($similarListings as $similar)
-                        <a href="{{ route('listings.show', $similar) }}" class="modern-property-card">
-                            <div class="modern-property-card__image-wrap">
-                                <img class="modern-property-card__image {{ $similar->cardImageClass() }}" src="{{ $similar->imageUrl() }}" alt="{{ $similar->title }}" loading="lazy" onerror="this.onerror=null;this.src='{{ \App\Models\Listing::defaultImageUrl() }}';this.classList.add('property-card__image--placeholder');">
-                            </div>
-                            <div class="modern-property-card__content">
-                                <div class="modern-property-card__meta">
-                                    {{ $similar->bedrooms ? $similar->bedrooms.' BHK ' : '' }}{{ $similar->subtypeLabel() }}
-                                </div>
-                                <div class="modern-property-card__price-row">
-                                    @if($similar->price)
-                                        {{ $similar->currency }} {{ number_format($similar->price, 0) }}
-                                    @else
-                                        POA
-                                    @endif
-                                </div>
-                                <div class="modern-property-card__location">
-                                    {{ $similar->city }}@if($similar->area), {{ $similar->area }}@endif
-                                </div>
-                            </div>
-                        </a>
+                        <x-modern-property-card :listing="$similar" />
                     @endforeach
                 </div>
-            </section>
-        @endif
+            @endif
+        </section>
     </div>
 </section>
 @endsection

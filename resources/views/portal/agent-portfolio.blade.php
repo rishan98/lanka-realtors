@@ -1,6 +1,9 @@
 @extends('layouts.portal')
 
-@section('title', $agent->name.' Portfolio — '.config('app.name'))
+@section('title', $seo['title'])
+@section('meta_description', $seo['description'])
+@section('canonical', $seo['canonical'])
+@section('og_image', $seo['image'])
 
 @section('content')
 @php($totalPublished = array_sum($kindCounts))
@@ -44,6 +47,26 @@
                 <img src="{{ $agent->avatarUrl() }}" alt="{{ $agent->name }}" width="380" height="480" loading="eager" decoding="async">
             </figure>
         </header>
+
+        @if($agent->phone || $agent->email)
+            <section class="agent-portfolio__contact glass glass--pad">
+                <h2 class="agent-portfolio__contact-title">Contact {{ $agent->name }}</h2>
+                <div class="agent-portfolio__contact-grid">
+                    @if($agent->phone)
+                        <a href="tel:{{ preg_replace('/\s+/', '', $agent->phone) }}" class="agent-portfolio__contact-item">
+                            <span class="agent-portfolio__contact-label">Phone</span>
+                            <span class="agent-portfolio__contact-value">{{ $agent->phone }}</span>
+                        </a>
+                    @endif
+                    @if($agent->email)
+                        <a href="mailto:{{ $agent->email }}" class="agent-portfolio__contact-item">
+                            <span class="agent-portfolio__contact-label">Email</span>
+                            <span class="agent-portfolio__contact-value">{{ $agent->email }}</span>
+                        </a>
+                    @endif
+                </div>
+            </section>
+        @endif
 
         @if(!empty($agent->bio))
             <section class="agent-portfolio__bio glass glass--pad">

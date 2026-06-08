@@ -28,6 +28,14 @@
                 <span class="admin-nav__badge">{{ $pendingCount }}</span>
             @endif
         </a>
+        <a class="agent-nav__link{{ $active('admin.agents.*') }}" href="{{ route('admin.agents.index') }}">
+            <span class="agent-nav__icon" aria-hidden="true">★</span>
+            Agent ratings
+        </a>
+        <a class="agent-nav__link{{ $active('admin.cities.*') }}" href="{{ route('admin.cities.index') }}">
+            <span class="agent-nav__icon" aria-hidden="true">⌖</span>
+            Cities
+        </a>
         <a class="agent-nav__link{{ $active('admin.contact-inquiries.*') }}" href="{{ route('admin.contact-inquiries.index') }}">
             <span class="agent-nav__icon" aria-hidden="true">✉</span>
             Contact inquiries

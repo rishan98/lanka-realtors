@@ -15,8 +15,11 @@
             @endif
             <h3 class="mb-agent-card__name">{{ $agent->name }}</h3>
         </div>
-        @if($agent->is_preferred)
-            <img src="https://img.icons8.com/color/48/000000/guarantee.png" alt="" class="mb-agent-card__badge">
+        @if($agent->hasRating())
+            <div class="mb-agent-card__rating" aria-label="Rating {{ $agent->formattedRating() }} out of 5">
+                <span class="mb-agent-card__rating-value">{{ $agent->formattedRating() }}</span>
+                <span class="mb-agent-card__rating-star" aria-hidden="true">★</span>
+            </div>
         @endif
     </div>
     <div class="mb-agent-card__body">

@@ -1,7 +1,48 @@
 <?php
 
 return [
-    'tagline' => 'Properties for every Sri Lankan buyer & renter.',
+    'tagline' => 'The Smarter Way to Buy, Sell & Rent Property.',
+
+    'logo' => 'images/logo.jpeg',
+
+    'about' => [
+        'eyebrow' => 'About Lanka Realtors Web LK',
+        'title' => 'Sri Lanka\'s dedicated property advertising portal for real estate professionals',
+        'intro' => [
+            'Welcome to Lanka Realtors Web LK — Sri Lanka\'s dedicated property advertising portal created especially for real estate professionals, agencies, brokers, and property marketers.',
+            'Established in February 2025, Lanka Realtors was built with a clear vision: to provide realtors with a professional digital platform that increases property visibility, attracts genuine buyers, and helps grow real estate businesses across Sri Lanka.',
+            'In today\'s fast-moving property market, realtors need more than traditional advertising. They need a modern online presence that delivers reach, trust, and results. Lanka Realtors offers an easy-to-use and SEO-optimized property portal where agents and agencies can professionally showcase properties to a larger audience.',
+        ],
+        'established' => 'February 2025',
+        'audiences_title' => 'Our platform is designed to support',
+        'audiences' => [
+            'Licensed real estate agents',
+            'Property marketing companies',
+            'Independent realtors',
+            'Real estate agencies',
+            'Property developers',
+            'Land and commercial property marketers',
+        ],
+        'benefits_title' => 'At Lanka Realtors, we help realtors',
+        'benefits' => [
+            'Advertise properties professionally online',
+            'Reach more buyers and investors across Sri Lanka',
+            'Increase lead generation opportunities',
+            'Build trust and brand visibility',
+            'Promote residential and commercial listings effectively',
+            'Gain better online exposure through SEO-focused marketing',
+        ],
+        'belief' => 'We believe realtors are the backbone of the property industry. That is why our platform focuses on giving real estate professionals the tools and visibility they need to succeed in the digital market.',
+        'reach' => 'Whether you are marketing luxury homes, apartments, commercial buildings, lands, or investment properties, Lanka Realtors provides a trusted space to connect with serious buyers and investors.',
+        'goal' => 'Our goal is to become one of Sri Lanka\'s most reliable and recognized real estate advertising platforms by empowering realtors with innovative digital marketing solutions and high-quality property exposure.',
+        'cta_title' => 'Take your real estate business to the next level',
+        'cta_text' => 'Join Lanka Realtors Web LK and grow with a platform built for professional realtors.',
+    ],
+
+    'seo' => [
+        'default_description' => 'Browse property for sale, rent, and investment across Sri Lanka. Find verified agents, map search, and listings on Lanka Realtors.',
+        'default_image' => null,
+    ],
 
     'company' => [
         'email' => env('PORTAL_CONTACT_EMAIL', 'hello@lankarealtors.test'),

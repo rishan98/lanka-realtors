@@ -21,6 +21,7 @@ class Listing extends Model
         'currency',
         'listing_kind',
         'property_subtype',
+        'city_id',
         'city',
         'area',
         'latitude',
@@ -68,6 +69,23 @@ class Listing extends Model
                 $listing->slug = static::uniqueSlug($listing->title);
             }
         });
+
+        static::saving(function (Listing $listing) {
+            if ($listing->city_id) {
+                $city = City::with('parent')->find($listing->city_id);
+                if ($city) {
+                    $listing->city = $city->listingLabel();
+
+                    if ($listing->latitude === null && $city->latitude !== null) {
+                        $listing->latitude = $city->latitude;
+                    }
+
+                    if ($listing->longitude === null && $city->longitude !== null) {
+                        $listing->longitude = $city->longitude;
+                    }
+                }
+            }
+        });
     }
 
     public static function uniqueSlug(string $title): string
@@ -87,9 +105,69 @@ class Listing extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function cityRelation()
+    {
+        return $this->belongsTo(City::class, 'city_id');
+    }
+
     public function scopePublished($query)
     {
         return $query->where('status', 'published');
+    }
+
+    public static function similarTo(self $listing, int $limit = 4)
+    {
+        $results = collect();
+        $excludeIds = [$listing->id];
+
+        $tiers = [
+            function ($query) use ($listing) {
+                $query->where('listing_kind', $listing->listing_kind);
+
+                if ($listing->city_id) {
+                    $query->where('city_id', $listing->city_id);
+                } elseif ($listing->city) {
+                    $query->where('city', $listing->city);
+                }
+
+                if ($listing->property_subtype) {
+                    $query->where('property_subtype', $listing->property_subtype);
+                }
+            },
+            function ($query) use ($listing) {
+                $query->where('listing_kind', $listing->listing_kind);
+
+                if ($listing->city_id) {
+                    $query->where('city_id', $listing->city_id);
+                } elseif ($listing->city) {
+                    $query->where('city', $listing->city);
+                }
+            },
+            function ($query) use ($listing) {
+                $query->where('listing_kind', $listing->listing_kind);
+            },
+        ];
+
+        foreach ($tiers as $applyTier) {
+            if ($results->count() >= $limit) {
+                break;
+            }
+
+            $need = $limit - $results->count();
+
+            $batch = static::query()
+                ->published()
+                ->whereNotIn('id', $excludeIds)
+                ->tap($applyTier)
+                ->latest()
+                ->take($need)
+                ->get();
+
+            $results = $results->merge($batch);
+            $excludeIds = array_merge($excludeIds, $batch->pluck('id')->all());
+        }
+
+        return $results->take($limit)->values();
     }
 
     public function subtypeLabel(): string
@@ -177,29 +255,74 @@ class Listing extends Model
         return $this->hasImages() ? '' : 'property-card__image--placeholder';
     }
 
+    public function imageCount(): int
+    {
+        return count($this->resolvedImagePaths());
+    }
+
+    public function cardStatusLabel(): ?string
+    {
+        if ($furnishing = $this->furnishingLabel()) {
+            return $furnishing;
+        }
+
+        return $this->kindLabel();
+    }
+
+    public function cardMetaLabel(): string
+    {
+        $parts = [];
+
+        if ($this->bedrooms !== null) {
+            $parts[] = ($this->bedrooms >= 5 ? '5+' : $this->bedrooms).' BHK';
+        }
+
+        $parts[] = $this->subtypeLabel();
+
+        return implode(' ', $parts);
+    }
+
+    public function cardAreaLabel(): ?string
+    {
+        if ($this->built_area_sqft) {
+            return number_format($this->built_area_sqft).' sq.ft.';
+        }
+
+        if ($landSize = $this->landSizeLabel()) {
+            return $landSize;
+        }
+
+        return null;
+    }
+
     public function priceShortLabel(): string
     {
-        if (! $this->price) {
-            return 'Price on request';
-        }
-
-        if ($this->price >= 1000000) {
-            $millions = $this->price / 1000000;
-            $formatted = number_format($millions, fmod($millions, 1.0) === 0.0 ? 0 : 1);
-
-            return 'Rs. '.$formatted.'M onwards';
-        }
-
-        return $this->currency.' '.number_format($this->price, 0);
+        return $this->formattedPriceDisplay();
     }
 
     public function investPriceFootnote(): string
     {
         if ($this->property_subtype === 'land') {
-            return 'per plot';
+            return $this->landSizeLabel() ?: 'Land investment';
         }
 
-        return 'starting price';
+        if ($perSqft = $this->pricePerSqftLabel()) {
+            return $perSqft;
+        }
+
+        return $this->kindLabel();
+    }
+
+    public function investLocationLabel(): string
+    {
+        $parts = [$this->subtypeLabel()];
+        $place = trim(collect([$this->area, $this->city])->filter()->implode(', '));
+
+        if ($place !== '') {
+            return $parts[0].' — '.$place;
+        }
+
+        return $parts[0];
     }
 
     /**
@@ -209,23 +332,58 @@ class Listing extends Model
     {
         $lines = [];
 
-        $location = trim($this->subtypeLabel().($this->city ? ' — '.$this->city : ''));
-        if ($location !== '') {
+        if ($location = $this->investLocationLabel()) {
             $lines[] = $location;
         }
 
-        if ($this->description) {
-            $snippet = Str::limit(trim(strip_tags($this->description)), 90);
-            if ($snippet !== '') {
-                $lines[] = $snippet;
-            }
+        $description = trim(strip_tags((string) $this->description));
+        if ($description !== ''
+            && ! $this->isBoilerplateDescription($description)
+            && ! $this->descriptionRepeatsTitle($description)) {
+            $lines[] = Str::limit($description, 90);
         }
 
-        if (count($lines) < 2) {
-            $lines[] = 'Published investment listing on Lanka Realtors';
+        if (count($lines) < 2 && ($fact = $this->investFactLine())) {
+            $lines[] = $fact;
         }
 
         return array_slice($lines, 0, 2);
+    }
+
+    protected function investFactLine(): ?string
+    {
+        $parts = [];
+
+        if ($this->built_area_sqft) {
+            $parts[] = number_format($this->built_area_sqft).' sq.ft. built-up';
+        }
+
+        if ($this->bedrooms !== null) {
+            $parts[] = ($this->bedrooms >= 5 ? '5+' : $this->bedrooms).' BHK';
+        }
+
+        if ($this->landSizeLabel()) {
+            $parts[] = $this->landSizeLabel();
+        }
+
+        if ($parts !== []) {
+            return implode(' · ', $parts);
+        }
+
+        return null;
+    }
+
+    protected function isBoilerplateDescription(string $description): bool
+    {
+        return str_contains($description, 'Listed as ')
+            && str_contains($description, 'Lanka Realtors');
+    }
+
+    protected function descriptionRepeatsTitle(string $description): bool
+    {
+        $title = trim((string) $this->title);
+
+        return $title !== '' && str_starts_with($description, $title);
     }
 
     /**
@@ -273,9 +431,9 @@ class Listing extends Model
         }
 
         $parts[] = $this->subtypeLabel();
-        $parts[] = 'For '.$this->kindLabel();
+        $parts[] = $this->kindLabel();
 
-        $location = trim(($this->area ? $this->area.', ' : '').($this->city ?? ''));
+        $location = trim(collect([$this->area, $this->city])->filter()->implode(', '));
         if ($location !== '') {
             $parts[] = 'in '.$location;
         }
@@ -350,8 +508,8 @@ class Listing extends Model
         $items[] = ['label' => 'Listing Type', 'value' => $this->kindLabel()];
         $items[] = ['label' => 'Property Type', 'value' => $this->subtypeLabel()];
 
-        if ($this->listing_kind !== 'wanted') {
-            $items[] = ['label' => 'Status', 'value' => 'Ready to Move'];
+        if ($this->listing_kind !== 'wanted' && ($status = $this->cardStatusLabel())) {
+            $items[] = ['label' => 'Status', 'value' => $status];
         }
 
         return $items;

@@ -36,10 +36,22 @@
         @error('description')<div class="error-text">{{ $message }}</div>@enderror
     </div>
 
-    <div class="field mt-2" data-field="city">
-        <label for="city">City / town</label>
-        <input class="input @error('city') is-invalid @enderror" id="city" name="city" value="{{ old('city', $listing->city) }}">
-        @error('city')<div class="error-text">{{ $message }}</div>@enderror
+    <div class="field mt-2" data-field="city_id">
+        <label for="listing_district">District</label>
+        <select class="input" id="listing_district">
+            <option value="">Select district</option>
+            @foreach(($districts ?? $cities ?? []) as $district)
+                <option value="{{ $district->id }}">{{ $district->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="field mt-2" data-field="city_id">
+        <label for="city_id">City / area</label>
+        <select class="input @error('city_id') is-invalid @enderror" id="city_id" name="city_id">
+            <option value="">Select area</option>
+        </select>
+        @error('city_id')<div class="error-text">{{ $message }}</div>@enderror
     </div>
 
     <div class="field mt-2" data-field="contact_number">
@@ -206,6 +218,18 @@
 <script type="application/json" id="kind-fields-data">{!! json_encode($kindFields) !!}</script>
 <script type="application/json" id="required-fields-data">{!! json_encode($requiredFields) !!}</script>
 <script type="application/json" id="land-hidden-fields-data">{!! json_encode(config('listing.land_hidden_fields')) !!}</script>
+@php
+    $districtOptions = collect($districts ?? $cities ?? [])->map(function ($district) {
+        return [
+            'id' => $district->id,
+            'name' => $district->name,
+            'areas' => $district->children->map(function ($area) {
+                return ['id' => $area->id, 'name' => $area->name];
+            })->values(),
+        ];
+    })->values();
+@endphp
+<script type="application/json" id="districts-data">{!! json_encode($districtOptions) !!}</script>
 <script>
 (function () {
     var taxonomy = JSON.parse(document.getElementById('taxonomy-data').textContent);
@@ -292,6 +316,55 @@
     });
 
     subEl.addEventListener('change', updateFields);
+
+    var districtsData = JSON.parse(document.getElementById('districts-data').textContent);
+    var districtEl = document.getElementById('listing_district');
+    var cityEl = document.getElementById('city_id');
+    var selectedCityId = @json(old('city_id', $listing->city_id));
+
+    function fillAreas(districtId, selectedId) {
+        cityEl.innerHTML = '<option value="">Select area</option>';
+        if (!districtId) {
+            return;
+        }
+
+        var district = districtsData.find(function (entry) {
+            return String(entry.id) === String(districtId);
+        });
+
+        if (!district) {
+            return;
+        }
+
+        district.areas.forEach(function (area) {
+            var opt = document.createElement('option');
+            opt.value = area.id;
+            opt.textContent = area.name;
+            if (selectedId && String(selectedId) === String(area.id)) {
+                opt.selected = true;
+            }
+            cityEl.appendChild(opt);
+        });
+    }
+
+    if (districtEl && cityEl) {
+        districtEl.addEventListener('change', function () {
+            fillAreas(districtEl.value, null);
+        });
+
+        if (selectedCityId) {
+            var matchDistrict = districtsData.find(function (entry) {
+                return entry.areas.some(function (area) {
+                    return String(area.id) === String(selectedCityId);
+                });
+            });
+
+            if (matchDistrict) {
+                districtEl.value = matchDistrict.id;
+                fillAreas(matchDistrict.id, selectedCityId);
+            }
+        }
+    }
 
     fillSubtypes();
     updateFields();

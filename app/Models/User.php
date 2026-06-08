@@ -38,6 +38,7 @@ class User extends Authenticatable
         'company_logo_path',
         'operating_since_year',
         'buyers_served_estimate',
+        'rating',
     ];
 
     protected $hidden = [
@@ -48,6 +49,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_preferred' => 'boolean',
+        'rating' => 'float',
     ];
 
     public function listings()
@@ -68,6 +70,39 @@ class User extends Authenticatable
     public function scopePendingApproval(Builder $query): Builder
     {
         return $query->where('approval_status', self::APPROVAL_PENDING);
+    }
+
+    public function scopeWithPublishedListingCounts(Builder $query): Builder
+    {
+        return $query->withCount([
+            'listings as published_sale_count' => function ($q) {
+                $q->where('status', 'published')->where('listing_kind', 'sale');
+            },
+            'listings as published_rent_count' => function ($q) {
+                $q->where('status', 'published')->where('listing_kind', 'rental');
+            },
+        ]);
+    }
+
+    public function scopeOrderedByRating(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('rating')
+            ->where('rating', '>', 0)
+            ->orderByDesc('rating')
+            ->orderBy('name');
+    }
+
+    public function hasRating(): bool
+    {
+        return $this->rating !== null && (float) $this->rating > 0;
+    }
+
+    public function formattedRating(): ?string
+    {
+        return $this->hasRating()
+            ? number_format((float) $this->rating, 1)
+            : null;
     }
 
     public function requiresApproval(): bool

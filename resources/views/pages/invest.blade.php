@@ -1,6 +1,8 @@
 @extends('layouts.portal')
 
 @section('title', 'Invest now — '.config('app.name'))
+@section('meta_description', 'Explore property investment opportunities in Sri Lanka — new projects, off-plan developments, and invest listings with clear handover details.')
+@section('canonical', route('invest'))
 
 @section('content')
 <section class="section section--tight">

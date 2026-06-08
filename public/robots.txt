@@ -1,2 +1,10 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /agent
+Disallow: /owner
+Disallow: /login
+Disallow: /register
+Disallow: /password
+Disallow: /home
+
+Sitemap: /sitemap.xml

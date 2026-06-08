@@ -1,6 +1,8 @@
 @extends('layouts.portal')
 
-@section('title', 'Browse listings — '.config('app.name'))
+@section('title', $seo['title'])
+@section('meta_description', $seo['description'])
+@section('canonical', $seo['canonical'])
 
 @section('content')
 <section class="section section--tight">
@@ -33,8 +35,8 @@
                         <input class="input" id="q2" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Search title or location">
                     </div>
                     <div class="field">
-                        <label for="city2">City</label>
-                        <input class="input" id="city2" name="city" value="{{ $filters['city'] ?? '' }}">
+                        <label for="city2">City / area</label>
+                        <x-city-filter-select id="city2" name="city" :selected="$filters['city'] ?? ''" :districts="$districts" placeholder="All cities" />
                     </div>
                     <div class="field">
                         <label class="field-label" style="opacity:0">Go</label>

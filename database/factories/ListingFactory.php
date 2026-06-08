@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\City;
 use App\Models\Listing;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -17,6 +18,9 @@ class ListingFactory extends Factory
         $subtype = $this->faker->randomElement($subtypes);
         $isLand = $subtype === 'land';
 
+        $city = City::query()->areas()->active()->with('parent')->inRandomOrder()->first();
+        $cityName = $city?->listingLabel() ?? 'Colombo 7, Colombo';
+
         return [
             'user_id' => User::factory(),
             'title' => $this->faker->sentence(4),
@@ -26,7 +30,8 @@ class ListingFactory extends Factory
             'currency' => 'LKR',
             'listing_kind' => $kind,
             'property_subtype' => $subtype,
-            'city' => $this->faker->randomElement(['Colombo', 'Kandy', 'Galle', 'Negombo']),
+            'city_id' => $city?->id,
+            'city' => $cityName,
             'area' => $this->faker->streetName(),
             'latitude' => $this->faker->latitude(6.0, 7.5),
             'longitude' => $this->faker->longitude(79.8, 80.8),
