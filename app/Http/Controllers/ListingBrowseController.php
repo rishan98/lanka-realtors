@@ -88,6 +88,8 @@ class ListingBrowseController extends Controller
             ]);
         }]);
 
+        $listing->recordView();
+
         $similarListings = Listing::similarTo($listing, 4);
 
         return view('listings.show', [

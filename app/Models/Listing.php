@@ -55,6 +55,7 @@ class Listing extends Model
         'short_term_available' => 'boolean',
         'bills_included' => 'boolean',
         'images' => 'array',
+        'view_count' => 'integer',
     ];
 
     public function getRouteKeyName()
@@ -258,6 +259,26 @@ class Listing extends Model
     public function imageCount(): int
     {
         return count($this->resolvedImagePaths());
+    }
+
+    public function recordView(): bool
+    {
+        if (auth()->id() === $this->user_id) {
+            return false;
+        }
+
+        $sessionKey = 'viewed_listing_ids';
+        $viewed = session($sessionKey, []);
+
+        if (in_array($this->id, $viewed, true)) {
+            return false;
+        }
+
+        $this->increment('view_count');
+        $viewed[] = $this->id;
+        session([$sessionKey => $viewed]);
+
+        return true;
     }
 
     public function cardStatusLabel(): ?string

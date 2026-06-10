@@ -126,17 +126,14 @@
                     </section>
                 @endif
 
-                @if($listing->user->isAgent())
-                    <section class="listing-detail__section listing-detail__section--agent">
-                        <h2 class="listing-detail__section-title">About Agent</h2>
-                        <div class="listing-detail__agent-card">
-                            <x-agent-card :agent="$listing->user" />
-                        </div>
-                    </section>
-                @endif
             </div>
 
             <aside class="listing-detail__aside">
+                @if($listing->user->isAgent())
+                    <div class="listing-detail__aside-agent">
+                        <x-agent-card :agent="$listing->user" />
+                    </div>
+                @endif
                 <div class="listing-detail__contact-card">
                     <div class="listing-detail__price listing-detail__price--desktop">{{ $listing->formattedPriceDisplay() }}</div>
                     @if($perSqft = $listing->pricePerSqftLabel())

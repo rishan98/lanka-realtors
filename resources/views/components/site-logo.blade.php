@@ -4,7 +4,7 @@
 
 <a {{ $attributes->merge(['class' => $class, 'href' => route('portal.home')]) }}>
     <img
-        src="{{ asset(config('portal.logo', 'images/logo.jpeg')) }}"
+        src="{{ asset(config('portal.logo', 'images/logo.png')) }}"
         alt="{{ config('app.name') }}"
         class="brand__logo"
         width="200"

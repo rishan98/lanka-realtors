@@ -15,6 +15,7 @@ class PortalController extends Controller
     {
         $featured = Listing::published()
             ->with('user')
+            ->orderByDesc('view_count')
             ->latest()
             ->take(4)
             ->get();
@@ -44,6 +45,7 @@ class PortalController extends Controller
             'kinds' => config('listing.kinds'),
             'quick' => config('listing.homepage_quick'),
             'portal' => config('portal'),
+            'heroCarousel' => config('portal.hero_carousel', []),
             'budget_presets' => config('portal.budget_presets_lkr', []),
             'sqft_presets' => config('portal.sqft_presets', []),
         ]);

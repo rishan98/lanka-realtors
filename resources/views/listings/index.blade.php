@@ -7,17 +7,51 @@
 @section('content')
 <section class="section section--tight">
     <div class="container split">
-        <aside class="glass glass--pad">
-            <h2 class="section-title" style="font-size:1.1rem">Refine</h2>
+        <aside class="refine-sidebar glass glass--refine">
+            <header class="refine-sidebar__header">
+                <span class="refine-sidebar__eyebrow">Search &amp; filter</span>
+                <h2 class="refine-sidebar__title">Refine</h2>
+            </header>
+
+            <form method="get" action="{{ route('listings.index') }}" class="refine-sidebar__filters">
+                <div class="refine-field">
+                    <label class="refine-field__label" for="q2">Keyword</label>
+                    <div class="refine-field__control">
+                        <span class="refine-field__icon" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        </span>
+                        <input class="input refine-field__input" id="q2" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Search title or location">
+                    </div>
+                </div>
+                <div class="refine-field">
+                    <label class="refine-field__label" for="city2">City / area</label>
+                    <div class="refine-field__control refine-field__control--select">
+                        <span class="refine-field__icon" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </span>
+                        <x-city-filter-select id="city2" name="city" :selected="$filters['city'] ?? ''" :districts="$districts" placeholder="All cities" />
+                    </div>
+                </div>
+                <button class="btn-gold refine-sidebar__submit" type="submit">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    Apply filters
+                </button>
+                @foreach(['kind', 'subtype', 'quick'] as $hidden)
+                    @if(!empty($filters[$hidden]))
+                        <input type="hidden" name="{{ $hidden }}" value="{{ $filters[$hidden] }}">
+                    @endif
+                @endforeach
+            </form>
 
             @php($activeKind = $filters['kind'] ?? null)
             @if($activeKind && isset($kinds[$activeKind]))
-                <div class="mt-2">
-                    <div class="field-label">Types in this category</div>
-                    <div class="subtype-list">
+                <div class="refine-sidebar__divider" aria-hidden="true"></div>
+                <div class="refine-sidebar__types">
+                    <h3 class="refine-sidebar__types-label">Types in this category</h3>
+                    <div class="refine-type-chips">
                         @foreach($kinds[$activeKind]['subtypes'] as $subKey => $label)
                             <a href="{{ route('listings.index', ['kind' => $activeKind, 'subtype' => $subKey]) }}"
-                               class="{{ ($filters['subtype'] ?? null) === $subKey ? 'is-active' : '' }}">{{ $label }}</a>
+                               class="refine-type-chip{{ ($filters['subtype'] ?? null) === $subKey ? ' is-active' : '' }}">{{ $label }}</a>
                         @endforeach
                     </div>
                 </div>
@@ -26,84 +60,7 @@
 
         <div>
             <h1 class="section-title">Listings</h1>
-            <p class="section-lead">Showing published properties. Use the panel to narrow by property type, or switch category from the menu above.</p>
-
-            <form method="get" action="{{ route('listings.index') }}" class="glass glass--pad mt-2" style="margin-bottom:22px">
-                <div class="search-row">
-                    <div class="field">
-                        <label for="q2">Keyword</label>
-                        <input class="input" id="q2" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Search title or location">
-                    </div>
-                    <div class="field">
-                        <label for="city2">City / area</label>
-                        <x-city-filter-select id="city2" name="city" :selected="$filters['city'] ?? ''" :districts="$districts" placeholder="All cities" />
-                    </div>
-                    <div class="field">
-                        <label class="field-label" style="opacity:0">Go</label>
-                        <button class="btn-gold" type="submit" style="width:100%;min-height:46px">Filter</button>
-                    </div>
-                </div>
-                <details class="mb-more" style="margin-top:12px">
-                    <summary>Budget, BHK, built-up area</summary>
-                    <div class="mb-more__body">
-                        <div class="search-row mb-row-tight">
-                            <div class="field">
-                                <label for="bhk2">BHK</label>
-                                <select class="input" id="bhk2" name="bhk">
-                                    <option value="">Any</option>
-                                    @foreach([1,2,3,4] as $b)
-                                        <option value="{{ $b }}" {{ ($filters['bhk'] ?? '') === (string)$b ? 'selected' : '' }}>{{ $b }} BHK</option>
-                                    @endforeach
-                                    <option value="5" {{ ($filters['bhk'] ?? '') === '5' ? 'selected' : '' }}>5+ BHK</option>
-                                </select>
-                            </div>
-                            <div class="field">
-                                <label for="price_min2">Price min (LKR)</label>
-                                <select class="input" id="price_min2" name="price_min">
-                                    <option value="">Min</option>
-                                    @foreach($budget_presets as $p)
-                                        <option value="{{ $p }}" {{ (string)($filters['price_min'] ?? '') === (string)$p ? 'selected' : '' }}>{{ number_format($p / 1000000, ($p % 1000000 === 0 ? 0 : 1)) }} Mn</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="field">
-                                <label for="price_max2">Price max (LKR)</label>
-                                <select class="input" id="price_max2" name="price_max">
-                                    <option value="">Max</option>
-                                    @foreach($budget_presets as $p)
-                                        <option value="{{ $p }}" {{ (string)($filters['price_max'] ?? '') === (string)$p ? 'selected' : '' }}>{{ number_format($p / 1000000, ($p % 1000000 === 0 ? 0 : 1)) }} Mn</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="search-row mb-row-tight" style="margin-top:10px">
-                            <div class="field">
-                                <label for="area_min2">Sq.ft. min</label>
-                                <select class="input" id="area_min2" name="area_min">
-                                    <option value="">Min</option>
-                                    @foreach($sqft_presets as $s)
-                                        <option value="{{ $s }}" {{ (string)($filters['area_min'] ?? '') === (string)$s ? 'selected' : '' }}>{{ number_format($s) }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="field">
-                                <label for="area_max2">Sq.ft. max</label>
-                                <select class="input" id="area_max2" name="area_max">
-                                    <option value="">Max</option>
-                                    @foreach($sqft_presets as $s)
-                                        <option value="{{ $s }}" {{ (string)($filters['area_max'] ?? '') === (string)$s ? 'selected' : '' }}>{{ number_format($s) }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </details>
-                @foreach(['kind', 'subtype', 'quick'] as $hidden)
-                    @if(!empty($filters[$hidden]))
-                        <input type="hidden" name="{{ $hidden }}" value="{{ $filters[$hidden] }}">
-                    @endif
-                @endforeach
-            </form>
+            <p class="section-lead">Showing published properties. Use the sidebar to search and narrow by property type, or switch category from the menu above.</p>
 
             @if($listings->isEmpty())
                 <div class="block-gray">No listings match your filters yet.</div>

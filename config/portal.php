@@ -3,7 +3,29 @@
 return [
     'tagline' => 'The Smarter Way to Buy, Sell & Rent Property.',
 
-    'logo' => 'images/logo.jpeg',
+    'logo' => 'images/logo.png',
+
+    /*
+    | Hero search carousel (right column, above the search box).
+    | image: path under public/ or a full https URL
+    */
+    'hero_carousel' => [
+        [
+            'image' => 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=80',
+            'alt' => 'Luxury home with pool',
+            'url' => null,
+        ],
+        [
+            'image' => 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80',
+            'alt' => 'Modern living room and terrace',
+            'url' => null,
+        ],
+        [
+            'image' => 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=900&q=80',
+            'alt' => 'Contemporary villa exterior',
+            'url' => null,
+        ],
+    ],
 
     'about' => [
         'eyebrow' => 'About Lanka Realtors Web LK',
