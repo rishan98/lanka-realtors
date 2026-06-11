@@ -20,6 +20,7 @@
 @endphp
 
 <nav class="nav nav--primary" aria-label="Property categories">
+    <a href="{{ route('portal.home') }}" class="{{ trim($navRouteActive('portal.home')) }}" @if(request()->routeIs('portal.home')) aria-current="page" @endif>Home</a>
     <a href="{{ route('listings.index', ['kind' => 'sale']) }}" class="{{ trim($navActive('sale')) }}" @if($activeNavKind === 'sale') aria-current="page" @endif>Sales</a>
     <a href="{{ route('listings.index', ['kind' => 'rental']) }}" class="{{ trim($navActive('rental')) }}" @if($activeNavKind === 'rental') aria-current="page" @endif>Rental</a>
     <a href="{{ route('listings.index', ['kind' => 'invest']) }}" class="{{ trim($navActive('invest')) }}" @if($activeNavKind === 'invest') aria-current="page" @endif>Invest</a>

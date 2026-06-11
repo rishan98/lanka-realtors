@@ -9,5 +9,13 @@
     <p>Choose the right segment so buyers can find you faster.</p>
 </header>
 
-@include('agent.listings._form', ['method' => 'POST', 'action' => route($pfx.'.listings.store'), 'portalPrefix' => $pfx])
+@include('agent.listings._form', [
+    'method' => 'POST',
+    'action' => route($pfx.'.listings.store'),
+    'portalPrefix' => $pfx,
+    'districts' => $districts,
+    'districtOptions' => $districtOptions,
+    'kinds' => $kinds,
+    'listing' => $listing,
+])
 @endsection

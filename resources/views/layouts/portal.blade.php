@@ -15,35 +15,40 @@
 </head>
 <body>
     <header class="site-header">
-        <div class="container site-header__stack">
-            <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-hidden="true">
+        <div class="site-header__top">
+            <div class="container">
+                <div class="site-header__bar">
+                    <x-site-logo />
 
-            <div class="site-header__bar">
-                <x-site-logo />
-
-                <div class="site-header__bar-end">
-                    <div class="header-actions">
-                        @auth
-                            <a href="{{ auth()->user()->dashboardRoute() }}" class="btn-outline-light btn--header-sm">Dashboard</a>
-                            @unless(auth()->user()->isAdmin())
-                                <a class="btn-gold btn-gold--header" href="{{ auth()->user()->postListingRoute() }}">Post property</a>
-                            @endunless
-                            <a class="btn-outline-light btn--header-sm" href="{{ route('logout') }}"
-                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none">
-                                @csrf
-                            </form>
-                        @else
-                            <a class="btn-gold btn-gold--header" href="{{ route('grab-me') }}">Post property</a>
-                            <a href="{{ route('login') }}" class="btn-outline-light btn--header-sm">Login</a>
-                            <a href="{{ route('register') }}" class="btn-gold btn-gold--header">Sign up</a>
-                        @endauth
+                    <div class="site-header__bar-end">
+                        <div class="header-actions">
+                            @auth
+                                <a href="{{ auth()->user()->dashboardRoute() }}" class="btn-outline-header btn--header-sm">Dashboard</a>
+                                @unless(auth()->user()->isAdmin())
+                                    <a class="btn-gold btn-gold--header" href="{{ auth()->user()->postListingRoute() }}">Post property</a>
+                                @endunless
+                                <a class="btn-outline-header btn--header-sm" href="{{ route('logout') }}"
+                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none">
+                                    @csrf
+                                </form>
+                            @else
+                                <a class="btn-gold btn-gold--header" href="{{ route('grab-me') }}">Post property</a>
+                                <a href="{{ route('login') }}" class="btn-outline-header btn--header-sm">Login</a>
+                                <a href="{{ route('register') }}" class="btn-gold btn-gold--header">Sign up</a>
+                            @endauth
+                        </div>
+                        <label class="nav-toggle-label" for="nav-toggle">Menu</label>
                     </div>
-                    <label class="nav-toggle-label" for="nav-toggle">Menu</label>
                 </div>
             </div>
+        </div>
 
-            @include('components.primary-nav')
+        <div class="site-header__nav-band">
+            <div class="container site-header__stack">
+                <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-hidden="true">
+                @include('components.primary-nav')
+            </div>
         </div>
     </header>
 

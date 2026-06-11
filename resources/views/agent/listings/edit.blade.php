@@ -9,7 +9,15 @@
     <p>Update facts, imagery, and visibility whenever terms change.</p>
 </header>
 
-@include('agent.listings._form', ['method' => 'PUT', 'action' => route($pfx.'.listings.update', $listing), 'portalPrefix' => $pfx])
+@include('agent.listings._form', [
+    'method' => 'PUT',
+    'action' => route($pfx.'.listings.update', $listing),
+    'portalPrefix' => $pfx,
+    'districts' => $districts,
+    'districtOptions' => $districtOptions,
+    'kinds' => $kinds,
+    'listing' => $listing,
+])
 
 <form method="post" action="{{ route($pfx.'.listings.destroy', $listing) }}" class="mt-3" onsubmit="return confirm('Delete this listing permanently?');">
     @csrf

@@ -153,6 +153,19 @@ class City extends Model
             ->filter(fn (City $district) => $district->children->isNotEmpty());
     }
 
+    public static function districtsOptionsForJs(?int $includeCityId = null): array
+    {
+        return static::districtsForForms($includeCityId)->map(function (City $district) {
+            return [
+                'id' => $district->id,
+                'name' => $district->name,
+                'areas' => $district->children->map(function (City $area) {
+                    return ['id' => $area->id, 'name' => $area->name];
+                })->values()->all(),
+            ];
+        })->values()->all();
+    }
+
     public function publishedListingCount(): int
     {
         return $this->listings()->where('status', 'published')->count();

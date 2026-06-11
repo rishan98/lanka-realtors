@@ -64,11 +64,19 @@ img {
 }
 
 .site-header {
-    background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%);
-    color: #e8edf7;
     position: sticky;
     top: 0;
     z-index: 50;
+}
+
+.site-header__top {
+    background: var(--gray-soft);
+    border-bottom: 1px solid var(--border);
+}
+
+.site-header__nav-band {
+    background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%);
+    color: #e8edf7;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -76,7 +84,7 @@ img {
     position: relative;
     display: flex;
     flex-direction: column;
-    padding: 12px 0 10px;
+    padding: 10px 0 8px;
     gap: 0;
 }
 
@@ -87,6 +95,7 @@ img {
     gap: 14px;
     flex-wrap: wrap;
     width: 100%;
+    padding: 12px 0;
 }
 
 .site-header__bar-end {
@@ -136,10 +145,32 @@ img {
     cursor: pointer;
     padding: 8px 10px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #fff;
+    border: 1px solid rgba(11, 27, 51, 0.18);
+    color: var(--navy);
+    background: rgba(255, 255, 255, 0.65);
     font-size: 0.85rem;
+    font-weight: 600;
     flex-shrink: 0;
+}
+
+.nav-toggle-label:hover {
+    background: #fff;
+    border-color: rgba(11, 27, 51, 0.28);
+}
+
+.btn-outline-header {
+    border: 1px solid rgba(11, 27, 51, 0.22);
+    color: var(--navy);
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-outline-header:hover {
+    background: rgba(11, 27, 51, 0.06);
+    border-color: rgba(11, 27, 51, 0.35);
 }
 
 .nav.nav--primary {
@@ -149,9 +180,9 @@ img {
     flex-wrap: wrap;
     gap: 4px 6px;
     width: 100%;
-    padding: 12px 0 4px;
-    margin-top: 6px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 4px 0 2px;
+    margin-top: 0;
+    border-top: none;
 }
 
 .nav--primary>a {
@@ -1179,6 +1210,20 @@ img {
         display: inline-block;
     }
 
+    .site-header__nav-band {
+        height: 0;
+        overflow: visible;
+        padding: 0;
+        background: transparent;
+        border-bottom: none;
+    }
+
+    .site-header__nav-band .site-header__stack {
+        padding: 0;
+        height: 0;
+        overflow: visible;
+    }
+
     .nav.nav--primary {
         display: none;
         position: absolute;
@@ -1194,6 +1239,10 @@ img {
         border-radius: 0 0 14px 14px;
         box-shadow: var(--shadow);
         z-index: 60;
+    }
+
+    .site-header {
+        position: sticky;
     }
 
     .nav--primary>a {
@@ -1319,7 +1368,7 @@ img {
         align-self: stretch;
         display: flex;
         flex-direction: column;
-        min-height: 400px;
+        min-height: 500px;
     }
 
     .hero-search__agents {

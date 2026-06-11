@@ -40,7 +40,7 @@
         <label for="listing_district">District</label>
         <select class="input" id="listing_district">
             <option value="">Select district</option>
-            @foreach(($districts ?? $cities ?? []) as $district)
+            @foreach(($districts ?? []) as $district)
                 <option value="{{ $district->id }}">{{ $district->name }}</option>
             @endforeach
         </select>
@@ -218,18 +218,7 @@
 <script type="application/json" id="kind-fields-data">{!! json_encode($kindFields) !!}</script>
 <script type="application/json" id="required-fields-data">{!! json_encode($requiredFields) !!}</script>
 <script type="application/json" id="land-hidden-fields-data">{!! json_encode(config('listing.land_hidden_fields')) !!}</script>
-@php
-    $districtOptions = collect($districts ?? $cities ?? [])->map(function ($district) {
-        return [
-            'id' => $district->id,
-            'name' => $district->name,
-            'areas' => $district->children->map(function ($area) {
-                return ['id' => $area->id, 'name' => $area->name];
-            })->values(),
-        ];
-    })->values();
-@endphp
-<script type="application/json" id="districts-data">{!! json_encode($districtOptions) !!}</script>
+<script type="application/json" id="districts-data">@json($districtOptions ?? [])</script>
 <script>
 (function () {
     var taxonomy = JSON.parse(document.getElementById('taxonomy-data').textContent);
