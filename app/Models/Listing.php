@@ -89,6 +89,10 @@ class Listing extends Model
                 }
             }
         });
+
+        static::deleting(function (Listing $listing) {
+            $listing->deleteStoredImages();
+        });
     }
 
     public static function uniqueSlug(string $title): string
@@ -234,12 +238,53 @@ class Listing extends Model
 
     public function allImagePaths(): array
     {
-        $paths = $this->images ?? [];
-        if ($this->featured_image && ! in_array($this->featured_image, $paths, true)) {
+        $paths = is_array($this->images) ? $this->images : [];
+
+        if ($this->featured_image) {
             $paths[] = $this->featured_image;
         }
 
-        return $paths;
+        return array_values(array_unique(array_filter(array_map(
+            fn ($path) => self::normalizeStoragePath(is_string($path) ? $path : null),
+            $paths
+        ))));
+    }
+
+    public function deleteStoredImages(): void
+    {
+        self::deleteStoredFiles($this->allImagePaths());
+    }
+
+    public static function deleteStoredFiles(array $paths): void
+    {
+        foreach (array_unique(array_filter($paths)) as $path) {
+            $normalized = self::normalizeStoragePath($path);
+
+            if ($normalized) {
+                Storage::disk('public')->delete($normalized);
+            }
+        }
+    }
+
+    public static function normalizeStoragePath(?string $path): ?string
+    {
+        if (! is_string($path) || trim($path) === '') {
+            return null;
+        }
+
+        $path = str_replace('\\', '/', trim($path));
+
+        if (str_contains($path, '://')) {
+            $path = parse_url($path, PHP_URL_PATH) ?? '';
+        }
+
+        $path = ltrim($path, '/');
+
+        if (str_starts_with($path, 'storage/')) {
+            $path = substr($path, strlen('storage/'));
+        }
+
+        return $path !== '' ? $path : null;
     }
 
     public function resolvedImagePaths(): array

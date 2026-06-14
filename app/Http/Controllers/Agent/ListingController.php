@@ -7,7 +7,6 @@ use App\Models\City;
 use App\Models\Listing;
 use App\Support\ListingValidation;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class ListingController extends Controller
@@ -121,7 +120,6 @@ class ListingController extends Controller
     {
         $this->authorizeListing($listing);
 
-        $this->deleteImages($listing->allImagePaths());
         $listing->delete();
 
         return redirect()->route($this->portalPrefix().'.listings.index')->with('status', 'Listing removed.');
@@ -186,7 +184,7 @@ class ListingController extends Controller
     {
         if (! in_array('images', ListingValidation::allowedFields($kind), true)) {
             if (count($listing->allImagePaths()) > 0) {
-                $this->deleteImages($listing->allImagePaths());
+                Listing::deleteStoredFiles($listing->allImagePaths());
 
                 return null;
             }
@@ -219,7 +217,7 @@ class ListingController extends Controller
         $final = array_merge($remaining, $newPaths);
 
         if (count($final) > $maxImages) {
-            $this->deleteImages($newPaths);
+            Listing::deleteStoredFiles($newPaths);
             throw ValidationException::withMessages([
                 'images' => 'You can have at most '.$maxImages.' image'.($maxImages === 1 ? '' : 's').' for this category.',
             ]);
@@ -227,13 +225,13 @@ class ListingController extends Controller
 
         $imagesRequired = in_array('images', config('listing.required_fields.'.$kind, []), true);
         if (empty($final) && $imagesRequired) {
-            $this->deleteImages($newPaths);
+            Listing::deleteStoredFiles($newPaths);
             throw ValidationException::withMessages([
                 'images' => 'At least one image is required.',
             ]);
         }
 
-        $this->deleteImages($removed);
+        Listing::deleteStoredFiles($removed);
 
         if (empty($final)) {
             return null;
@@ -259,12 +257,5 @@ class ListingController extends Controller
         }
 
         return $nulls;
-    }
-
-    protected function deleteImages(array $paths): void
-    {
-        foreach (array_unique(array_filter($paths)) as $path) {
-            Storage::disk('public')->delete($path);
-        }
     }
 }
