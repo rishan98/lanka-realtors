@@ -56,6 +56,8 @@ class Listing extends Model
         'bills_included' => 'boolean',
         'images' => 'array',
         'view_count' => 'integer',
+        'phone_lead_count' => 'integer',
+        'email_lead_count' => 'integer',
     ];
 
     public function getRouteKeyName()
@@ -114,6 +116,22 @@ class Listing extends Model
     public function scopePublished($query)
     {
         return $query->where('status', 'published');
+    }
+
+    public function scopeFromOwners($query)
+    {
+        return $query->whereHas('user', function ($userQuery) {
+            $userQuery->where('role', User::ROLE_OWNER)
+                ->where('approval_status', User::APPROVAL_APPROVED);
+        });
+    }
+
+    public function scopeFromAgents($query)
+    {
+        return $query->whereHas('user', function ($userQuery) {
+            $userQuery->where('role', User::ROLE_AGENT)
+                ->where('approval_status', User::APPROVAL_APPROVED);
+        });
     }
 
     public static function similarTo(self $listing, int $limit = 4)
@@ -259,6 +277,13 @@ class Listing extends Model
     public function imageCount(): int
     {
         return count($this->resolvedImagePaths());
+    }
+
+    public function contactPhone(): ?string
+    {
+        $phone = $this->contact_number ?: $this->user?->phone;
+
+        return $phone ?: null;
     }
 
     public function recordView(): bool

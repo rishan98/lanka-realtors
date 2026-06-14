@@ -7,7 +7,7 @@
     <div class="row-flex" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
         <div>
             <h1>Pending registrations</h1>
-            <p>Approve or reject new agent and owner accounts before they can log in.</p>
+            <p>Approve or reject new agent accounts before they can log in.</p>
         </div>
         <a class="pill" href="{{ route('admin.dashboard') }}">← Dashboard</a>
     </div>

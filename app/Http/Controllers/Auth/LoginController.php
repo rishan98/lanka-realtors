@@ -42,6 +42,9 @@ class LoginController extends Controller
 
     protected function authenticated(Request $request, $user)
     {
-        return redirect()->intended(RouteServiceProvider::homeFor($user));
+        $fallback = RouteServiceProvider::homeFor($user);
+        $intended = session()->pull('url.intended', $fallback);
+
+        return redirect()->to(RouteServiceProvider::portalUrlFor($user, $intended));
     }
 }

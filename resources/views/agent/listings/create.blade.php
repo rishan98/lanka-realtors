@@ -5,8 +5,8 @@
 
 @section('agent_main')
 <header class="agent-page-head">
-    <h1>Create listing</h1>
-    <p>Choose the right segment so buyers can find you faster.</p>
+    <h1>Create ad</h1>
+    <p>Fill in each section below. Required fields change based on the category you choose.</p>
 </header>
 
 @include('agent.listings._form', [

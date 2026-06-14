@@ -3,17 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Mail\ContactInquiryReceived;
+use App\Models\City;
 use App\Models\ContactInquiry;
+use App\Models\Listing;
 use App\Models\User;
+use App\Support\ListingRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class SitePageController extends Controller
 {
-    public function investNow()
+    public function projects()
     {
-        return view('pages.invest');
+        return view('pages.projects');
     }
 
     public function wanted()
@@ -33,9 +36,48 @@ class SitePageController extends Controller
         return view('pages.find-realtor', compact('agents'));
     }
 
-    public function grabMe()
+    public function owners(Request $request)
     {
-        return view('pages.grab-me');
+        $query = Listing::published()
+            ->fromOwners()
+            ->with(['user', 'cityRelation']);
+
+        if ($request->filled('q')) {
+            $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $request->q).'%';
+            $query->where(function ($builder) use ($term) {
+                $builder->where('title', 'like', $term)
+                    ->orWhere('description', 'like', $term)
+                    ->orWhere('city', 'like', $term)
+                    ->orWhere('area', 'like', $term)
+                    ->orWhereHas('cityRelation', function ($cityQuery) use ($term) {
+                        $cityQuery->where('name', 'like', $term);
+                    });
+            });
+        }
+
+        if ($request->filled('city')) {
+            $resolvedCity = City::resolveFilter((string) $request->city);
+            if ($resolvedCity) {
+                $query->whereIn('city_id', $resolvedCity->filterCityIds());
+            } else {
+                $city = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $request->city).'%';
+                $query->where('city', 'like', $city);
+            }
+        }
+
+        if ($request->filled('kind') && ListingRules::validKind($request->kind)) {
+            $query->where('listing_kind', $request->kind);
+        }
+
+        $listings = $query->latest()->paginate(12)->withQueryString();
+        $filters = $request->only(['q', 'city', 'kind']);
+
+        return view('pages.owners', [
+            'listings' => $listings,
+            'kinds' => config('listing.kinds'),
+            'districts' => City::districtsForForms(),
+            'filters' => $filters,
+        ]);
     }
 
     public function about()

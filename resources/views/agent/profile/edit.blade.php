@@ -23,6 +23,15 @@
             @error('avatar')<div class="error-text">{{ $message }}</div>@enderror
         </div>
         @unless($isOwner ?? false)
+        <div class="agent-upload agent-upload--cover">
+            <label>Portfolio cover image</label>
+            @if($user->coverUrl())
+                <img class="agent-upload__preview agent-upload__preview--cover" src="{{ $user->coverUrl() }}" alt="">
+            @endif
+            <input class="input @error('cover') is-invalid @enderror" type="file" name="cover" accept="image/*">
+            <p class="muted" style="font-size:0.82rem;margin:0.35rem 0 0">Wide banner shown on your public portfolio page. JPG, PNG or WebP, up to 4 MB.</p>
+            @error('cover')<div class="error-text">{{ $message }}</div>@enderror
+        </div>
         <div class="agent-upload">
             <label>Agency logo</label>
             @if($user->companyLogoUrl())

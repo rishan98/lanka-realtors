@@ -5,7 +5,7 @@
 @section('canonical', route('locate'))
 
 @push('head')
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 @endpush
 
 @section('content')
@@ -36,8 +36,8 @@
                     For rent
                 </span>
                 <span class="locate-page__legend-item">
-                    <span class="locate-marker locate-marker--invest" aria-hidden="true"><span></span></span>
-                    Invest
+                    <span class="locate-marker locate-marker--projects" aria-hidden="true"><span></span></span>
+                    Projects
                 </span>
             </div>
 
@@ -53,7 +53,7 @@
 
 @push('scripts')
 <script type="application/json" id="map-listings-data">{!! $mapListings->toJson() !!}</script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 (function () {
     var listings = JSON.parse(document.getElementById('map-listings-data').textContent || '[]');
@@ -86,8 +86,8 @@
             iconAnchor: [14, 28],
             popupAnchor: [0, -24]
         }),
-        invest: L.divIcon({
-            className: 'locate-marker locate-marker--invest',
+        projects: L.divIcon({
+            className: 'locate-marker locate-marker--projects',
             html: '<span></span>',
             iconSize: [28, 28],
             iconAnchor: [14, 28],

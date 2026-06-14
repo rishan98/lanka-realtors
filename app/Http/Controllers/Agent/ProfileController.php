@@ -50,6 +50,7 @@ class ProfileController extends Controller
             $rules['operating_since_year'] = 'nullable|integer|min:1950|max:'.(date('Y') + 1);
             $rules['buyers_served_estimate'] = 'nullable|integer|min:0|max:10000000';
             $rules['company_logo'] = 'nullable|image|max:2048';
+            $rules['cover'] = 'nullable|image|max:4096';
         }
 
         $data = $request->validate($rules);
@@ -75,6 +76,13 @@ class ProfileController extends Controller
             }
             $folder = $isOwner ? 'owners/avatars' : 'agents/avatars';
             $user->avatar_path = $request->file('avatar')->store($folder, 'public');
+        }
+
+        if (! $isOwner && $request->hasFile('cover')) {
+            if ($user->cover_path) {
+                Storage::disk('public')->delete($user->cover_path);
+            }
+            $user->cover_path = $request->file('cover')->store('agents/covers', 'public');
         }
 
         if (! $isOwner && $request->hasFile('company_logo')) {

@@ -35,6 +35,7 @@ class User extends Authenticatable
         'agency_name',
         'bio',
         'avatar_path',
+        'cover_path',
         'company_logo_path',
         'operating_since_year',
         'buyers_served_estimate',
@@ -55,6 +56,33 @@ class User extends Authenticatable
     public function listings()
     {
         return $this->hasMany(Listing::class);
+    }
+
+    public function contactLeads()
+    {
+        return $this->hasMany(AgentContactLead::class, 'agent_id');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(AgentReview::class, 'agent_id');
+    }
+
+    public function averageReviewRating(): ?float
+    {
+        $average = $this->reviews()->approved()->avg('rating');
+
+        return $average !== null ? round((float) $average, 1) : null;
+    }
+
+    public function approvedReviewCount(): int
+    {
+        return $this->reviews()->approved()->count();
+    }
+
+    public function pendingReviewCount(): int
+    {
+        return $this->reviews()->pending()->count();
     }
 
     public function scopeAgents(Builder $query): Builder
@@ -107,7 +135,7 @@ class User extends Authenticatable
 
     public function requiresApproval(): bool
     {
-        return in_array($this->role, [self::ROLE_AGENT, self::ROLE_OWNER], true);
+        return $this->isAgent();
     }
 
     public function isApproved(): bool
@@ -189,6 +217,38 @@ class User extends Authenticatable
         $name = urlencode($this->name ?: 'User');
 
         return 'https://ui-avatars.com/api/?name='.$name.'&background=0b1b33&color=c9a227&size=128&bold=true';
+    }
+
+    public function hasCover(): bool
+    {
+        return $this->coverDisplayUrl() !== null;
+    }
+
+    public function coverUrl(): ?string
+    {
+        if ($this->cover_path) {
+            return asset('storage/'.$this->cover_path);
+        }
+
+        return null;
+    }
+
+    public function coverDisplayUrl(): ?string
+    {
+        if ($this->cover_path) {
+            return asset('storage/'.$this->cover_path);
+        }
+
+        if ($this->avatar_path) {
+            return asset('storage/'.$this->avatar_path);
+        }
+
+        return null;
+    }
+
+    public function usesAvatarAsCover(): bool
+    {
+        return empty($this->cover_path) && ! empty($this->avatar_path);
     }
 
     public function companyLogoUrl(): ?string

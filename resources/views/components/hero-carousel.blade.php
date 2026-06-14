@@ -1,11 +1,15 @@
-@props(['slides' => []])
+@props([
+    'slides' => [],
+    'modifier' => null,
+    'label' => 'Featured properties',
+])
 
 @php
     $slides = collect($slides)->filter(fn ($slide) => ! empty($slide['image']))->values();
 @endphp
 
 @if($slides->isNotEmpty())
-<div class="hero-carousel" data-hero-carousel aria-roledescription="carousel" aria-label="Featured properties">
+<div class="hero-carousel{{ $modifier ? ' hero-carousel--'.$modifier : '' }}" data-hero-carousel aria-roledescription="carousel" aria-label="{{ $label }}">
     <div class="hero-carousel__viewport">
         @foreach($slides as $index => $slide)
             @php

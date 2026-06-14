@@ -59,14 +59,25 @@
         </aside>
 
         <div>
-            <h1 class="section-title">Listings</h1>
-            <p class="section-lead">Showing published properties. Use the sidebar to search and narrow by property type, or switch category from the menu above.</p>
+            @if(! empty($categoryCarousel))
+                <div class="listings-banner">
+                    <x-hero-carousel
+                        :slides="$categoryCarousel"
+                        modifier="listings"
+                        :label="($kinds[$activeKind]['nav_label'] ?? 'Listings').' banners'"
+                    />
+                </div>
+            @endif
 
             @if($listings->isEmpty())
                 <div class="block-gray">No listings match your filters yet.</div>
             @else
-                <div class="card-grid card-grid--listings">
+                @php($usesWideListingCards = in_array($activeKind ?? null, ['projects', 'wanted'], true))
+                <div class="card-grid{{ $usesWideListingCards ? ' card-grid--wide' : ' card-grid--listings' }}">
                     @foreach($listings as $listing)
+                        @if($usesWideListingCards)
+                            <x-invest-listing-card :listing="$listing" />
+                        @else
                         <article class="property-card">
                             <a href="{{ route('listings.show', $listing) }}">
                                 <img class="property-card__image {{ $listing->cardImageClass() }}" src="{{ $listing->imageUrl() }}" alt="{{ $listing->title }}" loading="lazy" onerror="this.onerror=null;this.src='{{ \App\Models\Listing::defaultImageUrl() }}';this.classList.add('property-card__image--placeholder');">
@@ -98,6 +109,7 @@
                                 @endif
                             </div>
                         </article>
+                        @endif
                     @endforeach
                 </div>
 
@@ -109,3 +121,9 @@
     </div>
 </section>
 @endsection
+
+@if(! empty($categoryCarousel))
+    @push('scripts')
+        @include('partials.hero-carousel-script')
+    @endpush
+@endif

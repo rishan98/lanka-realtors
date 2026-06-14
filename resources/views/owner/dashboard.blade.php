@@ -26,7 +26,7 @@
 </div>
 
 <div class="agent-actions">
-    <a class="btn-gold" href="{{ route('owner.listings.create') }}">Post property</a>
+    <a class="btn-gold" href="{{ route('owner.listings.create') }}">Post Your Ad</a>
     <a class="pill" href="{{ route('owner.listings.index') }}">All listings</a>
     <a class="pill" href="{{ route('owner.profile.edit') }}">Edit profile</a>
 </div>

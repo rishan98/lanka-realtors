@@ -20,6 +20,9 @@ class DashboardController extends Controller
             'total' => $user->listings()->count(),
             'published' => $user->listings()->where('status', 'published')->count(),
             'draft' => $user->listings()->where('status', 'draft')->count(),
+            'phone_leads' => $user->contactLeads()->where('type', 'phone')->count(),
+            'email_leads' => $user->contactLeads()->where('type', 'email')->count(),
+            'pending_reviews' => $user->pendingReviewCount(),
         ];
 
         return view('agent.dashboard', compact('myListings', 'stats'));

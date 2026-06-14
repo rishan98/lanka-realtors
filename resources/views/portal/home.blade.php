@@ -166,17 +166,17 @@
 <section class="section-top-viewed" style="padding: 60px 0; background: #fff; border-top: 1px solid #eee;">
     <div class="container">
         <header class="section-top-viewed__header" style="border-bottom:none; margin-bottom: 24px;">
-            <h2 class="section-top-viewed__title">Top Investment Listings</h2>
-            <a href="{{ route('listings.index', ['kind' => 'invest']) }}" class="section-top-viewed__link">See all investments &rarr;</a>
+            <h2 class="section-top-viewed__title">Top Project Listings</h2>
+            <a href="{{ route('listings.index', ['kind' => 'projects']) }}" class="section-top-viewed__link">See all projects &rarr;</a>
         </header>
 
-        @if($investListings->isEmpty())
+        @if($projectListings->isEmpty())
             <div class="block-gray mt-4">
-                <p class="muted mb-0">No investment listings yet. <a href="{{ route('listings.index', ['kind' => 'invest']) }}">Browse invest</a> or post a new listing.</p>
+                <p class="muted mb-0">No project listings yet. <a href="{{ route('listings.index', ['kind' => 'projects']) }}">Browse projects</a> or post a new listing.</p>
             </div>
         @else
             <div class="mb-corridor-slider">
-                @foreach($investListings as $listing)
+                @foreach($projectListings as $listing)
                     <x-invest-corridor-card :listing="$listing" />
                 @endforeach
             </div>
@@ -188,67 +188,6 @@
 @endsection
 
 @push('scripts')
-<script>
-(function () {
-    var root = document.querySelector('[data-hero-carousel]');
-    if (!root) return;
-
-    var slides = Array.prototype.slice.call(root.querySelectorAll('[data-hero-carousel-slide]'));
-    var dots = Array.prototype.slice.call(root.querySelectorAll('[data-hero-carousel-dot]'));
-    if (slides.length < 2) return;
-
-    var index = 0;
-    var timer = null;
-    var delay = 5000;
-    var paused = false;
-
-    function show(next) {
-        index = (next + slides.length) % slides.length;
-        slides.forEach(function (slide, i) {
-            var active = i === index;
-            slide.classList.toggle('is-active', active);
-            slide.setAttribute('aria-hidden', active ? 'false' : 'true');
-        });
-        dots.forEach(function (dot, i) {
-            var active = i === index;
-            dot.classList.toggle('is-active', active);
-            dot.setAttribute('aria-selected', active ? 'true' : 'false');
-        });
-    }
-
-    function next() {
-        show(index + 1);
-    }
-
-    function start() {
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        stop();
-        timer = window.setInterval(function () {
-            if (!paused) next();
-        }, delay);
-    }
-
-    function stop() {
-        if (timer) {
-            window.clearInterval(timer);
-            timer = null;
-        }
-    }
-
-    dots.forEach(function (dot, i) {
-        dot.addEventListener('click', function () {
-            show(i);
-            start();
-        });
-    });
-
-    root.addEventListener('mouseenter', function () { paused = true; });
-    root.addEventListener('mouseleave', function () { paused = false; });
-    root.addEventListener('focusin', function () { paused = true; });
-    root.addEventListener('focusout', function () { paused = false; });
-
-    start();
-})();
-</script>
+@include('partials.hero-carousel-script')
 @endpush
 

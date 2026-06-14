@@ -13,7 +13,7 @@
             <p class="section-lead mt-2 mb-0">Thank you for registering. An administrator will review your account before you can log in.</p>
         @endif
 
-        <p class="muted mt-3 mb-0">You will receive access once your agent or owner account is approved. If you have questions, contact the site administrator.</p>
+        <p class="muted mt-3 mb-0">You will receive access once your agent account is approved. If you have questions, contact the site administrator.</p>
 
         <div class="mt-3">
             <a class="btn-gold" href="{{ route('portal.home') }}">Back to home</a>

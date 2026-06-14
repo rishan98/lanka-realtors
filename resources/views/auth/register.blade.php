@@ -13,7 +13,8 @@
 <div class="auth-wrap">
     <div class="glass auth-card">
         <h1>Create account</h1>
-        <p class="muted">Register as an agent or property owner to post listings on Lanka Realtors. Your account must be approved by an administrator before you can log in.</p>
+        <p class="muted" id="register-intro-agent">Register as a real estate agent on Lanka Realtors. Your account must be approved by an administrator before you can log in.</p>
+        <p class="muted" id="register-intro-owner" hidden>Register as a property owner to post listings on Lanka Realtors. You can log in and start posting right after signup.</p>
 
         <form method="POST" action="{{ route('register') }}" class="mt-3" id="register-form" enctype="multipart/form-data">
             @csrf
@@ -159,6 +160,8 @@
     var avatarInput = document.getElementById('avatar');
     var avatarPreview = document.getElementById('avatar-preview');
     var avatarPlaceholder = document.getElementById('avatar-placeholder');
+    var introAgent = document.getElementById('register-intro-agent');
+    var introOwner = document.getElementById('register-intro-owner');
 
     function updateRoleFields() {
         var role = form.querySelector('input[name="role"]:checked');
@@ -166,6 +169,8 @@
         agencyField.style.display = isAgent ? '' : 'none';
         avatarField.style.display = isAgent ? '' : 'none';
         avatarInput.required = isAgent;
+        introAgent.hidden = !isAgent;
+        introOwner.hidden = isAgent;
 
         if (isAgent) {
             avatarInput.setAttribute('name', 'avatar');

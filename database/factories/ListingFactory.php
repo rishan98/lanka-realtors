@@ -13,7 +13,7 @@ class ListingFactory extends Factory
 
     public function definition()
     {
-        $kind = $this->faker->randomElement(['sale', 'rental', 'invest', 'wanted']);
+        $kind = $this->faker->randomElement(['sale', 'rental', 'projects', 'wanted']);
         $subtypes = array_keys(config('listing.kinds.'.$kind.'.subtypes', ['house' => 'House']));
         $subtype = $this->faker->randomElement($subtypes);
         $isLand = $subtype === 'land';

@@ -41,7 +41,9 @@ class ListingController extends Controller
             'districtOptions' => City::districtsOptionsForJs(),
             'furnishingOptions' => config('listing.furnishing_options'),
             'landSizeUnits' => config('listing.land_size_units'),
-            'maxImages' => config('listing.max_images', 10),
+            'maxImages' => ListingValidation::maxImagesForKind(null),
+            'maxImagesByKind' => config('listing.max_images_by_kind', []),
+            'defaultMaxImages' => (int) config('listing.max_images', 10),
             'portalPrefix' => $this->portalPrefix(),
         ]);
     }
@@ -77,7 +79,9 @@ class ListingController extends Controller
             'districtOptions' => City::districtsOptionsForJs($listing->city_id),
             'furnishingOptions' => config('listing.furnishing_options'),
             'landSizeUnits' => config('listing.land_size_units'),
-            'maxImages' => config('listing.max_images', 10),
+            'maxImages' => ListingValidation::maxImagesForKind(null),
+            'maxImagesByKind' => config('listing.max_images_by_kind', []),
+            'defaultMaxImages' => (int) config('listing.max_images', 10),
             'portalPrefix' => $this->portalPrefix(),
         ]);
     }
@@ -95,15 +99,15 @@ class ListingController extends Controller
             $payload['slug'] = Listing::uniqueSlug($payload['title']);
         }
 
-        $imagePaths = $this->storeUploadedImages($request);
-        if ($imagePaths) {
-            $this->deleteImages($listing->allImagePaths());
-            $payload['images'] = $imagePaths;
-            $payload['featured_image'] = $imagePaths[0];
-        } elseif (! in_array('images', ListingValidation::allowedFields($kind), true)) {
-            $this->deleteImages($listing->allImagePaths());
-            $payload['images'] = null;
-            $payload['featured_image'] = null;
+        $imagePaths = $this->resolveImagesOnUpdate($request, $listing, $kind);
+        if ($imagePaths !== false) {
+            if ($imagePaths === null) {
+                $payload['images'] = null;
+                $payload['featured_image'] = null;
+            } else {
+                $payload['images'] = $imagePaths;
+                $payload['featured_image'] = $imagePaths[0];
+            }
         }
 
         $payload = array_merge($this->nullIrrelevantFields($kind), $payload);
@@ -173,6 +177,69 @@ class ListingController extends Controller
         }
 
         return $paths;
+    }
+
+    /**
+     * @return array|null|false  Final image paths, null when cleared, false when unchanged.
+     */
+    protected function resolveImagesOnUpdate(Request $request, Listing $listing, string $kind)
+    {
+        if (! in_array('images', ListingValidation::allowedFields($kind), true)) {
+            if (count($listing->allImagePaths()) > 0) {
+                $this->deleteImages($listing->allImagePaths());
+
+                return null;
+            }
+
+            return false;
+        }
+
+        $existingPaths = $listing->resolvedImagePaths();
+        $removed = array_values(array_intersect(
+            (array) $request->input('removed_images', []),
+            $existingPaths
+        ));
+        $remaining = array_values(array_diff($existingPaths, $removed));
+
+        $newPaths = [];
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                if ($file) {
+                    $newPaths[] = $file->store('listings', 'public');
+                }
+            }
+        }
+
+        $imagesChanged = ! empty($removed) || ! empty($newPaths);
+        if (! $imagesChanged) {
+            return false;
+        }
+
+        $maxImages = ListingValidation::maxImagesForKind($kind);
+        $final = array_merge($remaining, $newPaths);
+
+        if (count($final) > $maxImages) {
+            $this->deleteImages($newPaths);
+            throw ValidationException::withMessages([
+                'images' => 'You can have at most '.$maxImages.' image'.($maxImages === 1 ? '' : 's').' for this category.',
+            ]);
+        }
+
+        $imagesRequired = in_array('images', config('listing.required_fields.'.$kind, []), true);
+        if (empty($final) && $imagesRequired) {
+            $this->deleteImages($newPaths);
+            throw ValidationException::withMessages([
+                'images' => 'At least one image is required.',
+            ]);
+        }
+
+        $this->deleteImages($removed);
+
+        if (empty($final)) {
+            return null;
+        }
+
+        return $final;
     }
 
     protected function nullIrrelevantFields(string $kind): array

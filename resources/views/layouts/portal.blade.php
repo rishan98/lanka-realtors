@@ -25,7 +25,7 @@
                             @auth
                                 <a href="{{ auth()->user()->dashboardRoute() }}" class="btn-outline-header btn--header-sm">Dashboard</a>
                                 @unless(auth()->user()->isAdmin())
-                                    <a class="btn-gold btn-gold--header" href="{{ auth()->user()->postListingRoute() }}">Post property</a>
+                                    <a class="btn-gold btn-gold--header" href="{{ auth()->user()->postListingRoute() }}">Post Your Ad</a>
                                 @endunless
                                 <a class="btn-outline-header btn--header-sm" href="{{ route('logout') }}"
                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
@@ -33,7 +33,7 @@
                                     @csrf
                                 </form>
                             @else
-                                <a class="btn-gold btn-gold--header" href="{{ route('grab-me') }}">Post property</a>
+                                <a class="btn-gold btn-gold--header" href="{{ route('register', ['role' => 'owner']) }}">Post Your Ad</a>
                                 <a href="{{ route('login') }}" class="btn-outline-header btn--header-sm">Login</a>
                                 <a href="{{ route('register') }}" class="btn-gold btn-gold--header">Sign up</a>
                             @endauth

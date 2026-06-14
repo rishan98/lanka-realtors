@@ -26,7 +26,14 @@
         </a>
         <a class="agent-nav__link{{ $active('agent.listings.create') }}" href="{{ route('agent.listings.create') }}">
             <span class="agent-nav__icon" aria-hidden="true">+</span>
-            Post property
+            Post Your Ad
+        </a>
+        <a class="agent-nav__link{{ $active('agent.reviews.*') }}" href="{{ route('agent.reviews.index') }}">
+            <span class="agent-nav__icon" aria-hidden="true">★</span>
+            Reviews
+            @if($user->pendingReviewCount() > 0)
+                <span class="agent-nav__badge">{{ $user->pendingReviewCount() }}</span>
+            @endif
         </a>
         <a class="agent-nav__link{{ $active('agent.profile.*') }}" href="{{ route('agent.profile.edit') }}">
             <span class="agent-nav__icon" aria-hidden="true">✎</span>

@@ -67,11 +67,14 @@ return [
     ],
 
     'company' => [
-        'email' => env('PORTAL_CONTACT_EMAIL', 'hello@lankarealtors.test'),
-        'phone' => env('PORTAL_CONTACT_PHONE', '+94 11 234 5678'),
+        'email' => env('PORTAL_CONTACT_EMAIL', 'contactus@lankarealtors.lk'),
+        'phone' => env('PORTAL_CONTACT_PHONE', '+94 72 775 8910'),
         'address_line' => '42 Galle Road, Colombo 03',
         'city' => 'Colombo, Sri Lanka',
         'hours' => 'Monday – Friday, 9:00 AM – 6:00 PM (SLST)',
+        'latitude' => 6.9018,
+        'longitude' => 79.8612,
+        'map_zoom' => 15,
     ],
 
     'promo_cards' => [
@@ -83,11 +86,11 @@ return [
             'params' => [],
         ],
         [
-            'title' => 'Invest in new projects',
+            'title' => 'New development projects',
             'text' => 'Under-construction inventory with clear handover expectations.',
-            'cta' => 'Explore invest',
+            'cta' => 'Explore projects',
             'route' => 'listings.index',
-            'params' => ['kind' => 'invest'],
+            'params' => ['kind' => 'projects'],
         ],
         [
             'title' => 'Tools & assistance',
@@ -175,7 +178,7 @@ return [
                 ['label' => 'About us', 'route' => 'about'],
                 ['label' => 'Contact us', 'route' => 'contact'],
                 ['label' => 'Find a realtor', 'route' => 'find-realtor'],
-                ['label' => 'Grab me', 'route' => 'grab-me'],
+                ['label' => 'Owners', 'route' => 'owners'],
             ],
         ],
     ],

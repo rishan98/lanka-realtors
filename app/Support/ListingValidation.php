@@ -16,8 +16,7 @@ class ListingValidation
         $subtypes = array_keys(config('listing.kinds.'.$kind.'.subtypes', []));
         $kindFields = config('listing.kind_fields.'.$kind, []);
         $requiredFields = config('listing.required_fields.'.$kind, []);
-        $maxImages = config('listing.max_images', 10);
-        $hasExistingImages = $listing && count($listing->allImagePaths()) > 0;
+        $maxImages = self::maxImagesForKind($kind);
 
         $rules = [
             'listing_kind' => ['required', 'string', Rule::in(array_keys(config('listing.kinds', [])))],
@@ -110,7 +109,17 @@ class ListingValidation
         }
 
         if (in_array('images', $kindFields, true)) {
-            $imageRules = ['array', 'max:'.$maxImages];
+            $remainingExisting = 0;
+            if ($listing) {
+                $existing = $listing->resolvedImagePaths();
+                $removed = array_intersect((array) $request->input('removed_images', []), $existing);
+                $remainingExisting = count($existing) - count($removed);
+            }
+
+            $maxNewImages = max(0, $maxImages - $remainingExisting);
+            $hasExistingImages = $remainingExisting > 0;
+
+            $imageRules = ['array', 'max:'.$maxNewImages];
             if (in_array('images', $requiredFields, true) && ! $hasExistingImages) {
                 $imageRules[] = 'required';
             } else {
@@ -118,9 +127,26 @@ class ListingValidation
             }
             $rules['images'] = $imageRules;
             $rules['images.*'] = 'image|max:4096';
+
+            if ($listing) {
+                $rules['removed_images'] = 'nullable|array';
+                $rules['removed_images.*'] = ['string', Rule::in($listing->resolvedImagePaths())];
+            }
         }
 
         return $rules;
+    }
+
+    public static function maxImagesForKind(?string $kind): int
+    {
+        if ($kind) {
+            $byKind = config('listing.max_images_by_kind', []);
+            if (isset($byKind[$kind])) {
+                return (int) $byKind[$kind];
+            }
+        }
+
+        return (int) config('listing.max_images', 10);
     }
 
     public static function landHiddenFields(): array

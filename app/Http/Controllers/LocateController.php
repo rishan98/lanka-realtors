@@ -11,7 +11,7 @@ class LocateController extends Controller
     {
         $mapListings = Listing::query()
             ->published()
-            ->whereIn('listing_kind', ['sale', 'rental', 'invest'])
+            ->whereIn('listing_kind', ['sale', 'rental', 'projects'])
             ->with('cityRelation')
             ->get()
             ->map(function (Listing $listing) {

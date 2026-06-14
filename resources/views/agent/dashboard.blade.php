@@ -24,6 +24,16 @@
         <div class="agent-stat__value">{{ $stats['draft'] }}</div>
     </article>
     <article class="agent-stat">
+        <div class="agent-stat__label">Phone leads</div>
+        <div class="agent-stat__value">{{ $stats['phone_leads'] }}</div>
+        <div class="agent-stat__hint">Portfolio reveals</div>
+    </article>
+    <article class="agent-stat">
+        <div class="agent-stat__label">Email leads</div>
+        <div class="agent-stat__value">{{ $stats['email_leads'] }}</div>
+        <div class="agent-stat__hint">Portfolio reveals</div>
+    </article>
+    <article class="agent-stat">
         <div class="agent-stat__label">Buyers served</div>
         <div class="agent-stat__value">{{ $user->buyers_served_estimate ? number_format($user->buyers_served_estimate) : '—' }}</div>
         @if($user->operating_since_year)
@@ -35,6 +45,9 @@
 <div class="agent-actions">
     <a class="btn-gold" href="{{ route('agent.listings.create') }}">New listing</a>
     <a class="pill" href="{{ route('agent.listings.index') }}">All listings</a>
+    @if($stats['pending_reviews'] > 0)
+        <a class="pill" href="{{ route('agent.reviews.index') }}">Review pending ({{ $stats['pending_reviews'] }})</a>
+    @endif
     <a class="pill" href="{{ route('agent.profile.edit') }}">Edit profile</a>
 </div>
 

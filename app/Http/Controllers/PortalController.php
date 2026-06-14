@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\City;
+use App\Models\HeroCarouselBanner;
 use App\Models\Listing;
 use App\Models\User;
 use App\Support\ListingRules;
@@ -14,6 +15,7 @@ class PortalController extends Controller
     public function index()
     {
         $featured = Listing::published()
+            ->fromAgents()
             ->with('user')
             ->orderByDesc('view_count')
             ->latest()
@@ -29,8 +31,9 @@ class PortalController extends Controller
         $heroTopAgents = (clone $topAgentsQuery)->take(3)->get();
         $topAgents = (clone $topAgentsQuery)->take(4)->get();
 
-        $investListings = Listing::published()
-            ->where('listing_kind', 'invest')
+        $projectListings = Listing::published()
+            ->fromAgents()
+            ->where('listing_kind', 'projects')
             ->with('user')
             ->latest()
             ->take(8)
@@ -40,12 +43,12 @@ class PortalController extends Controller
             'featured' => $featured,
             'heroTopAgents' => $heroTopAgents,
             'topAgents' => $topAgents,
-            'investListings' => $investListings,
+            'projectListings' => $projectListings,
             'districts' => City::districtsForForms(),
             'kinds' => config('listing.kinds'),
             'quick' => config('listing.homepage_quick'),
             'portal' => config('portal'),
-            'heroCarousel' => config('portal.hero_carousel', []),
+            'heroCarousel' => HeroCarouselBanner::slidesForPortal(),
             'budget_presets' => config('portal.budget_presets_lkr', []),
             'sqft_presets' => config('portal.sqft_presets', []),
         ]);
@@ -57,7 +60,7 @@ class PortalController extends Controller
             abort(404);
         }
 
-        $portfolioKinds = ['sale', 'rental', 'invest', 'wanted'];
+        $portfolioKinds = ['sale', 'rental', 'projects', 'wanted'];
 
         $activeKind = $request->filled('kind') && ListingRules::validKind($request->kind)
             && in_array($request->kind, $portfolioKinds, true)
@@ -87,12 +90,21 @@ class PortalController extends Controller
 
         $listings = $listingsQuery->latest()->paginate(9)->withQueryString();
 
+        $reviews = $agent->reviews()->approved()->latest()->get();
+        $reviewCount = $agent->approvedReviewCount();
+        $averageReviewRating = $agent->averageReviewRating();
+        $visibleReviews = $reviews->take(3);
+
         return view('portal.agent-portfolio', [
             'agent' => $agent,
             'listings' => $listings,
             'activeKind' => $activeKind,
             'kindCounts' => $kindCounts,
             'portfolioKinds' => $portfolioKinds,
+            'reviews' => $reviews,
+            'visibleReviews' => $visibleReviews,
+            'reviewCount' => $reviewCount,
+            'averageReviewRating' => $averageReviewRating,
             'seo' => Seo::agentPortfolio($agent, $activeKind),
         ]);
     }

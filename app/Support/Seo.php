@@ -123,7 +123,7 @@ class Seo
             'title' => $title,
             'description' => $description,
             'canonical' => route('agents.portfolio', array_merge(['agent' => $agent], $params)),
-            'image' => $agent->avatarUrl(),
+            'image' => $agent->coverUrl() ?: $agent->avatarUrl(),
         ];
     }
 }

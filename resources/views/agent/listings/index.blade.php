@@ -22,6 +22,8 @@
                 <th>Title</th>
                 <th>Kind</th>
                 <th>Status</th>
+                <th>Phone leads</th>
+                <th>Email leads</th>
                 <th style="text-align:right">Actions</th>
             </tr>
         </thead>
@@ -49,6 +51,8 @@
                     </td>
                     <td>{{ $listing->kindLabel() }}</td>
                     <td><span class="pill">{{ $listing->status }}</span></td>
+                    <td>{{ number_format($listing->phone_lead_count ?? 0) }}</td>
+                    <td>{{ number_format($listing->email_lead_count ?? 0) }}</td>
                     <td style="text-align:right">
                         <div class="agent-listings-table__actions">
                             <a class="pill" href="{{ route('listings.show', $listing) }}">View</a>
@@ -62,7 +66,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="muted">No listings yet.</td></tr>
+                <tr><td colspan="7" class="muted">No listings yet.</td></tr>
             @endforelse
         </tbody>
     </table>

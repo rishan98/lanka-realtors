@@ -36,6 +36,55 @@ class RouteServiceProvider extends ServiceProvider
         }
     }
 
+    public static function portalPathFor(User $user, string $path, ?string $query = null): string
+    {
+        $path = ltrim($path, '/');
+
+        if ($user->isOwner() && str_starts_with($path, 'agent/')) {
+            if (str_starts_with($path, 'agent/reviews')) {
+                return self::appendQuery('/owner/dashboard', $query);
+            }
+
+            $path = 'owner/'.substr($path, strlen('agent/'));
+        } elseif ($user->isAgent() && str_starts_with($path, 'owner/')) {
+            $path = 'agent/'.substr($path, strlen('owner/'));
+        }
+
+        return self::appendQuery('/'.$path, $query);
+    }
+
+    public static function portalUrlFor(User $user, string $url): string
+    {
+        $parts = parse_url($url);
+        $path = ltrim($parts['path'] ?? '', '/');
+        $query = isset($parts['query']) ? $parts['query'] : null;
+
+        if ($path === '') {
+            return $url;
+        }
+
+        $mapped = self::portalPathFor($user, $path, $query);
+
+        if (! empty($parts['host'])) {
+            $scheme = ($parts['scheme'] ?? 'http').'://';
+            $host = $parts['host'];
+            $port = isset($parts['port']) ? ':'.$parts['port'] : '';
+
+            return $scheme.$host.$port.$mapped;
+        }
+
+        return url($mapped);
+    }
+
+    private static function appendQuery(string $path, ?string $query): string
+    {
+        if ($query === null || $query === '') {
+            return $path;
+        }
+
+        return $path.'?'.$query;
+    }
+
     /**
      * The controller namespace for the application.
      *

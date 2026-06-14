@@ -23,7 +23,7 @@
         </a>
         <a class="agent-nav__link{{ $active('owner.listings.create') }}" href="{{ route('owner.listings.create') }}">
             <span class="agent-nav__icon" aria-hidden="true">+</span>
-            Post property
+            Post Your Ad
         </a>
         <a class="agent-nav__link{{ $active('owner.profile.*') }}" href="{{ route('owner.profile.edit') }}">
             <span class="agent-nav__icon" aria-hidden="true">✎</span>

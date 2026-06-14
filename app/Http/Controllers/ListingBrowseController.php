@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\City;
+use App\Models\HeroCarouselBanner;
 use App\Models\Listing;
 use App\Support\ListingRules;
 use App\Support\Seo;
@@ -12,7 +13,23 @@ class ListingBrowseController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Listing::published()->with(['user', 'cityRelation']);
+        if ($request->input('kind') === 'invest') {
+            return redirect()->route('listings.index', array_merge(
+                $request->except('kind'),
+                ['kind' => 'projects']
+            ));
+        }
+
+        if ($request->input('quick') === 'invest') {
+            return redirect()->route('listings.index', array_merge(
+                $request->except('quick'),
+                ['quick' => 'projects']
+            ));
+        }
+
+        $query = Listing::published()
+            ->fromAgents()
+            ->with(['user', 'cityRelation']);
 
         if ($request->filled('q')) {
             $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $request->q).'%';
@@ -59,12 +76,16 @@ class ListingBrowseController extends Controller
         ]);
         $kinds = config('listing.kinds');
         $districts = City::districtsForForms();
+        $activeKind = $filters['kind'] ?? null;
+        $categoryCarousel = HeroCarouselBanner::slidesForListingKind($activeKind);
 
         return view('listings.index', [
             'listings' => $listings,
             'kinds' => $kinds,
             'districts' => $districts,
             'filters' => $filters,
+            'activeKind' => $activeKind,
+            'categoryCarousel' => $categoryCarousel,
             'budget_presets' => config('portal.budget_presets_lkr', []),
             'sqft_presets' => config('portal.sqft_presets', []),
             'seo' => Seo::listingIndex($filters, $kinds),

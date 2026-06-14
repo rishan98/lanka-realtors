@@ -1,9 +1,7 @@
 @php
     $user = auth()->user();
     $active = fn (string ...$names) => request()->routeIs(...$names) ? ' is-active' : '';
-    $pendingCount = \App\Models\User::pendingApproval()
-        ->whereIn('role', [\App\Models\User::ROLE_AGENT, \App\Models\User::ROLE_OWNER])
-        ->count();
+    $pendingCount = \App\Models\User::agents()->pendingApproval()->count();
 @endphp
 
 <aside class="agent-sidebar admin-sidebar">
@@ -35,6 +33,14 @@
         <a class="agent-nav__link{{ $active('admin.cities.*') }}" href="{{ route('admin.cities.index') }}">
             <span class="agent-nav__icon" aria-hidden="true">⌖</span>
             Cities
+        </a>
+        <a class="agent-nav__link{{ $active('admin.hero-carousel.*') }}" href="{{ route('admin.hero-carousel.edit') }}">
+            <span class="agent-nav__icon" aria-hidden="true">▣</span>
+            Homepage carousel
+        </a>
+        <a class="agent-nav__link{{ $active('admin.listing-banners.*') }}" href="{{ route('admin.listing-banners.index') }}">
+            <span class="agent-nav__icon" aria-hidden="true">▤</span>
+            Listing banners
         </a>
         <a class="agent-nav__link{{ $active('admin.contact-inquiries.*') }}" href="{{ route('admin.contact-inquiries.index') }}">
             <span class="agent-nav__icon" aria-hidden="true">✉</span>

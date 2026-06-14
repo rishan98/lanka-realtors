@@ -92,7 +92,9 @@ class RegisterController extends Controller
             'email' => $request->input('email'),
             'password' => Hash::make($request->input('password')),
             'role' => $role,
-            'approval_status' => User::APPROVAL_PENDING,
+            'approval_status' => $role === User::ROLE_AGENT
+                ? User::APPROVAL_PENDING
+                : User::APPROVAL_APPROVED,
             'phone' => $request->input('phone'),
             'agency_name' => $role === User::ROLE_AGENT
                 ? $request->input('agency_name')
@@ -103,12 +105,18 @@ class RegisterController extends Controller
 
     protected function registered(Request $request, $user)
     {
+        if ($user->isOwner()) {
+            return redirect()
+                ->intended(RouteServiceProvider::homeFor($user))
+                ->with('status', 'Your owner account is ready. You can start posting listings.');
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect()
             ->route('register.pending')
-            ->with('status', 'Your account has been submitted. An administrator will review your registration before you can log in.');
+            ->with('status', 'Your agent account has been submitted. An administrator will review your registration before you can log in.');
     }
 }

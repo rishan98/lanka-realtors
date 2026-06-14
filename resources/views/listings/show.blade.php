@@ -26,7 +26,7 @@
     if (empty($images)) {
         $images = [$listing->imageUrl()];
     }
-    $contactPhone = $listing->contact_number ?: $listing->user->phone;
+    $contactPhone = $listing->contactPhone();
 @endphp
 
 <section class="listing-detail">
@@ -142,19 +142,28 @@
 
                     <h3 class="listing-detail__contact-title">Contact {{ $listing->user->isAgent() ? 'Agent' : 'Owner' }}</h3>
 
-                    @if($contactPhone)
-                        <button type="button"
-                                class="listing-detail__contact-btn listing-detail__contact-btn--primary"
-                                id="listing-reveal-phone"
-                                data-phone="{{ $contactPhone }}">
-                            Get Phone No.
-                        </button>
-                        <p class="listing-detail__contact-number" id="listing-phone-display">{{ \App\Support\PhoneHelper::mask($contactPhone) }}</p>
-                    @endif
+                    <div class="listing-detail__contact-actions"
+                         data-listing-contact
+                         data-lead-url="{{ route('listings.contact-leads.store', $listing) }}">
+                        @if($contactPhone)
+                            <div class="listing-detail__contact-block" data-contact-type="phone">
+                                <button type="button"
+                                        class="listing-detail__contact-btn listing-detail__contact-btn--primary">
+                                    Get Phone No.
+                                </button>
+                                <p class="listing-detail__contact-number">{{ \App\Support\PhoneHelper::mask($contactPhone) }}</p>
+                                <div class="listing-detail__contact-reveal" hidden></div>
+                            </div>
+                        @endif
 
-                    <a href="mailto:{{ $listing->user->email }}" class="listing-detail__contact-btn listing-detail__contact-btn--outline">
-                        Email {{ $listing->user->isAgent() ? 'Agent' : 'Owner' }}
-                    </a>
+                        <div class="listing-detail__contact-block" data-contact-type="email">
+                            <button type="button"
+                                    class="listing-detail__contact-btn listing-detail__contact-btn--outline">
+                                Email {{ $listing->user->isAgent() ? 'Agent' : 'Owner' }}
+                            </button>
+                            <div class="listing-detail__contact-reveal" hidden></div>
+                        </div>
+                    </div>
 
                     @unless($listing->user->isAgent())
                         <div class="listing-detail__seller">
@@ -218,18 +227,71 @@
         });
     });
 
-    var revealBtn = document.getElementById('listing-reveal-phone');
-    var phoneDisplay = document.getElementById('listing-phone-display');
-    if (revealBtn && phoneDisplay) {
-        revealBtn.addEventListener('click', function () {
-            var phone = revealBtn.getAttribute('data-phone');
-            if (!phone) return;
-            phoneDisplay.textContent = phone;
-            var link = document.createElement('a');
-            link.href = 'tel:' + phone.replace(/\s+/g, '');
-            link.className = revealBtn.className;
-            link.textContent = 'Call now';
-            revealBtn.replaceWith(link);
+    var contactRoot = document.querySelector('[data-listing-contact]');
+    if (contactRoot) {
+        var leadUrl = contactRoot.getAttribute('data-lead-url');
+        var csrf = document.querySelector('meta[name="csrf-token"]');
+        var token = csrf ? csrf.getAttribute('content') : '';
+
+        contactRoot.querySelectorAll('[data-contact-type]').forEach(function (block) {
+            var type = block.getAttribute('data-contact-type');
+            var btn = block.querySelector('.listing-detail__contact-btn');
+            var masked = block.querySelector('.listing-detail__contact-number');
+            var result = block.querySelector('.listing-detail__contact-reveal');
+            if (!btn || !result) return;
+
+            btn.addEventListener('click', function () {
+                if (btn.disabled) return;
+
+                btn.disabled = true;
+                btn.textContent = 'Loading…';
+
+                fetch(leadUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ type: type })
+                })
+                    .then(function (response) {
+                        if (!response.ok) throw new Error('Request failed');
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        btn.hidden = true;
+                        if (masked) {
+                            masked.hidden = true;
+                        }
+                        result.hidden = false;
+                        result.replaceChildren();
+
+                        if (type === 'phone') {
+                            var number = document.createElement('p');
+                            number.className = 'listing-detail__contact-number';
+                            number.textContent = data.value;
+                            result.appendChild(number);
+                        } else {
+                            var email = document.createElement('p');
+                            email.className = 'listing-detail__contact-number';
+                            email.textContent = data.value;
+                            result.appendChild(email);
+                        }
+
+                        var action = document.createElement('a');
+                        action.className = 'listing-detail__contact-btn listing-detail__contact-btn--' + (type === 'phone' ? 'primary' : 'outline');
+                        action.href = data.href;
+                        action.textContent = data.action_label;
+                        result.appendChild(action);
+                    })
+                    .catch(function () {
+                        btn.disabled = false;
+                        btn.textContent = type === 'phone' ? 'Get Phone No.' : 'Email {{ $listing->user->isAgent() ? 'Agent' : 'Owner' }}';
+                        alert('Could not load contact details. Please try again.');
+                    });
+            });
         });
     }
 })();

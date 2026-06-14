@@ -17,8 +17,8 @@ class UserApprovalController extends Controller
     public function index()
     {
         $pending = User::query()
+            ->agents()
             ->pendingApproval()
-            ->whereIn('role', [User::ROLE_AGENT, User::ROLE_OWNER])
             ->orderBy('created_at')
             ->get();
 

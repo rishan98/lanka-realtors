@@ -20,9 +20,7 @@ class DashboardController extends Controller
             'admins' => User::where('role', User::ROLE_ADMIN)->count(),
             'agents' => User::where('role', User::ROLE_AGENT)->count(),
             'owners' => User::where('role', User::ROLE_OWNER)->count(),
-            'pending' => User::pendingApproval()
-                ->whereIn('role', [User::ROLE_AGENT, User::ROLE_OWNER])
-                ->count(),
+            'pending' => User::agents()->pendingApproval()->count(),
         ];
 
         $listingStats = [
@@ -32,8 +30,8 @@ class DashboardController extends Controller
         ];
 
         $pendingUsers = User::query()
+            ->agents()
             ->pendingApproval()
-            ->whereIn('role', [User::ROLE_AGENT, User::ROLE_OWNER])
             ->orderBy('created_at')
             ->take(5)
             ->get();

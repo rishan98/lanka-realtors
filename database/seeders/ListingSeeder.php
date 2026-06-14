@@ -104,9 +104,9 @@ class ListingSeeder extends Seeder
             $this->rental('nipun.perera@seed.test', 'annexe', 'Ground-floor annexe with separate entrance', 65000, 2, 1, 650, false, false),
 
             // —— Invest ——
-            $this->residential('ravi.silva@seed.test', 'invest', 'land', 'Coastal land parcel — tourism potential', 22000000, null, null, null, '8', 'perches'),
-            $this->residential('dilan.rathnayake@seed.test', 'invest', 'commercial', 'Mixed-use building — strong rental yield', 180000000, null, null, 8500),
-            $this->residential('anuki.jayawardena@seed.test', 'invest', 'apartment', 'Boutique apartment block — pre-launch units', 14500000, 2, 2, 980),
+            $this->residential('ravi.silva@seed.test', 'projects', 'land', 'Coastal land parcel — tourism potential', 22000000, null, null, null, '8', 'perches'),
+            $this->residential('dilan.rathnayake@seed.test', 'projects', 'commercial', 'Mixed-use building — strong rental yield', 180000000, null, null, 8500),
+            $this->residential('anuki.jayawardena@seed.test', 'projects', 'apartment', 'Boutique apartment block — pre-launch units', 14500000, 2, 2, 980),
 
             // —— Wanted ——
             $this->wanted('owner.kamal@seed.test', 'house', 'Looking for 3–4BR house in Colombo suburbs', 'Budget around 35M LKR. Prefer Nugegoda, Maharagama, or Dehiwala.'),

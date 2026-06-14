@@ -5,8 +5,8 @@
 
 @section('agent_main')
 <header class="agent-page-head">
-    <h1>Edit listing</h1>
-    <p>Update facts, imagery, and visibility whenever terms change.</p>
+    <h1>Edit ad</h1>
+    <p>Update details in each section below. Required fields depend on the listing category.</p>
 </header>
 
 @include('agent.listings._form', [

@@ -106,6 +106,18 @@
     font-size: 0.9rem;
 }
 
+.agent-nav__badge {
+    margin-left: auto;
+    min-width: 1.35rem;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #0b1b33;
+    background: #c9a227;
+}
+
 .agent-sidebar__foot {
     margin-top: auto;
     padding-top: 0.5rem;
@@ -296,6 +308,18 @@
     background: #f4f6f9;
 }
 
+.agent-upload--cover {
+    flex: 1 1 100%;
+}
+
+.agent-upload__preview--cover {
+    width: 100%;
+    max-width: 420px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
 .sr-only {
     position: absolute;
     width: 1px;
@@ -402,4 +426,381 @@
 
 .agent-listings-table__delete:hover {
     background: rgba(185, 28, 28, 0.08);
+}
+
+.agent-review-queue {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.agent-review-card {
+    padding: 1rem 1.1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(11, 27, 51, 0.08);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.agent-review-card--pending {
+    border-color: rgba(201, 162, 39, 0.35);
+    background: rgba(201, 162, 39, 0.06);
+}
+
+.agent-review-card--muted {
+    opacity: 0.72;
+}
+
+.agent-review-card__head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px 16px;
+    margin-bottom: 0.65rem;
+}
+
+.agent-review-card__stars {
+    display: block;
+    color: #c9a227;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+}
+
+.agent-review-card__meta {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.82rem;
+    color: #5a6578;
+}
+
+.agent-review-card__message {
+    margin: 0;
+    color: #1a2332;
+    line-height: 1.65;
+    font-size: 0.95rem;
+}
+
+.agent-review-card__badge {
+    display: inline-flex;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.agent-review-card__badge--pending {
+    color: #8a6f18;
+    background: rgba(201, 162, 39, 0.18);
+}
+
+.agent-review-card__badge--approved {
+    color: #166534;
+    background: rgba(22, 101, 52, 0.12);
+}
+
+.agent-review-card__badge--rejected {
+    color: #991b1b;
+    background: rgba(153, 27, 27, 0.1);
+}
+
+.agent-review-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 0.9rem;
+}
+
+.agent-review-card__actions form {
+    margin: 0;
+}
+
+/* Listing create / edit form */
+.listing-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.listing-form__section {
+    padding: 1.5rem 1.75rem;
+    border-bottom: 1px solid rgba(11, 27, 51, 0.08);
+}
+
+.listing-form__section:last-child {
+    border-bottom: none;
+}
+
+.listing-form__section--actions {
+    background: rgba(11, 27, 51, 0.02);
+}
+
+.listing-form__section-head {
+    margin-bottom: 1.15rem;
+}
+
+.listing-form__section-title {
+    margin: 0 0 0.3rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0b1b33;
+    letter-spacing: -0.01em;
+}
+
+.listing-form__section-lead {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #6b7c93;
+    line-height: 1.45;
+}
+
+.listing-form__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.listing-form__grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+}
+
+.listing-form__grid--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.listing-form__grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.listing-form__grid--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.listing-form__subblock {
+    padding: 1rem 1.1rem;
+    border-radius: 12px;
+    background: rgba(11, 27, 51, 0.03);
+    border: 1px dashed rgba(11, 27, 51, 0.1);
+}
+
+.listing-form__subblock-label {
+    margin: 0 0 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 650;
+    color: #4a5d78;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.listing-form__optional {
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+    color: #8a96a8;
+}
+
+.listing-form .field {
+    margin: 0;
+}
+
+.listing-form .field label {
+    font-size: 0.78rem;
+    font-weight: 650;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #5a6578;
+    margin-bottom: 0.4rem;
+}
+
+.listing-form .input,
+.listing-form textarea.input {
+    border-radius: 10px;
+    border-color: rgba(11, 27, 51, 0.12);
+}
+
+.listing-form .input:focus,
+.listing-form textarea.input:focus {
+    border-color: rgba(201, 162, 39, 0.55);
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.12);
+}
+
+.listing-form__upload {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.listing-form__upload-zone {
+    position: relative;
+}
+
+.listing-form__upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-height: 140px;
+    padding: 1.25rem;
+    border: 2px dashed rgba(11, 27, 51, 0.14);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    text-align: center;
+}
+
+.listing-form__upload-label:hover {
+    border-color: rgba(201, 162, 39, 0.45);
+    background: rgba(201, 162, 39, 0.05);
+}
+
+.listing-form__upload-icon {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 999px;
+    background: rgba(201, 162, 39, 0.15);
+    color: #7a5f00;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    font-weight: 300;
+    line-height: 1;
+}
+
+.listing-form__upload-text {
+    font-size: 0.95rem;
+    font-weight: 650;
+    color: #0b1b33;
+}
+
+.listing-form__upload-hint,
+.listing-form__hint {
+    font-size: 0.82rem;
+    color: #8a96a8;
+    margin: 0;
+}
+
+.listing-form__upload-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.listing-form__previews {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+.listing-form__preview {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(11, 27, 51, 0.1);
+    background: #f4f6f9;
+    aspect-ratio: 4 / 3;
+}
+
+.listing-form__preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.listing-form__preview-badge {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 0.2rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(11, 27, 51, 0.72);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 650;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.listing-form__preview-remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 1.65rem;
+    height: 1.65rem;
+    border: none;
+    border-radius: 999px;
+    background: rgba(139, 26, 26, 0.92);
+    color: #fff;
+    font-size: 1.15rem;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.listing-form__preview-remove:hover {
+    transform: scale(1.05);
+    background: #8b1a1a;
+}
+
+.listing-form__current-label {
+    margin: 0 0 0.65rem;
+    font-size: 0.84rem;
+    font-weight: 650;
+    color: #5a6578;
+}
+
+.listing-form__thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.listing-form__thumbs img {
+    width: 88px;
+    height: 66px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(11, 27, 51, 0.08);
+}
+
+.listing-form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.15rem;
+    padding-top: 1.15rem;
+    border-top: 1px solid rgba(11, 27, 51, 0.08);
+}
+
+@media (max-width: 900px) {
+    .listing-form__grid--3,
+    .listing-form__grid--4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .listing-form__section {
+        padding: 1.15rem 1rem;
+    }
+
+    .listing-form__grid--2,
+    .listing-form__grid--3,
+    .listing-form__grid--4 {
+        grid-template-columns: 1fr;
+    }
 }
