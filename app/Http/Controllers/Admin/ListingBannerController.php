@@ -18,24 +18,22 @@ class ListingBannerController extends Controller
 
     public function index(): View
     {
-        $kinds = collect(HeroCarouselBanner::LISTING_KINDS)
-            ->mapWithKeys(fn (string $kind) => [$kind => config('listing.kinds.'.$kind)])
-            ->filter();
+        $sections = HeroCarouselBanner::bannerSections();
 
         $activeBannerKinds = HeroCarouselBanner::query()
-            ->whereIn('context', HeroCarouselBanner::LISTING_KINDS)
+            ->whereIn('context', HeroCarouselBanner::listingBannerContexts())
             ->where('position', 1)
             ->pluck('context');
 
         return view('admin.listing-banners.index', [
-            'kinds' => $kinds,
+            'sections' => $sections,
             'activeBannerKinds' => $activeBannerKinds,
         ]);
     }
 
     public function edit(string $kind): View
     {
-        abort_unless(HeroCarouselBanner::isListingKind($kind), 404);
+        abort_unless(HeroCarouselBanner::isBannerContext($kind), 404);
 
         $banners = HeroCarouselBanner::query()
             ->forContext($kind)
@@ -51,7 +49,7 @@ class ListingBannerController extends Controller
             ->get()
             ->keyBy('position');
 
-        $kindMeta = config('listing.kinds.'.$kind, []);
+        $kindMeta = HeroCarouselBanner::bannerSections()[$kind] ?? [];
 
         return view('admin.listing-banners.edit', [
             'kind' => $kind,
@@ -62,7 +60,7 @@ class ListingBannerController extends Controller
 
     public function update(Request $request, string $kind): RedirectResponse
     {
-        abort_unless(HeroCarouselBanner::isListingKind($kind), 404);
+        abort_unless(HeroCarouselBanner::isBannerContext($kind), 404);
 
         CarouselBannerUpdater::update(
             $request,
@@ -71,7 +69,7 @@ class ListingBannerController extends Controller
             maxBanners: HeroCarouselBanner::LISTING_MAX_BANNERS
         );
 
-        $label = config('listing.kinds.'.$kind.'.nav_label', ucfirst($kind));
+        $label = HeroCarouselBanner::bannerSectionLabel($kind);
 
         return redirect()
             ->route('admin.listing-banners.edit', $kind)

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\StoredFile;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,6 +11,8 @@ class HeroCarouselBanner extends Model
     public const CONTEXT_HOMEPAGE = 'homepage';
 
     public const LISTING_KINDS = ['sale', 'rental', 'projects', 'wanted'];
+
+    public const PAGE_BANNER_CONTEXTS = ['lands', 'find-realtor', 'owners'];
 
     public const MIN_BANNERS = 1;
 
@@ -24,6 +27,17 @@ class HeroCarouselBanner extends Model
         'alt',
         'url',
     ];
+
+    protected static function booted(): void
+    {
+        static::updating(function (HeroCarouselBanner $banner) {
+            StoredFile::deleteMany(StoredFile::originalPathsForDirtyFields($banner, ['image_path']));
+        });
+
+        static::deleting(function (HeroCarouselBanner $banner) {
+            StoredFile::delete($banner->image_path);
+        });
+    }
 
     public function imageUrl(): string
     {
@@ -41,6 +55,49 @@ class HeroCarouselBanner extends Model
     }
 
     /**
+     * @return array<int, string>
+     */
+    public static function listingBannerContexts(): array
+    {
+        return array_merge(self::LISTING_KINDS, self::PAGE_BANNER_CONTEXTS);
+    }
+
+    public static function isBannerContext(string $context): bool
+    {
+        return in_array($context, self::listingBannerContexts(), true);
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    public static function bannerSections(): array
+    {
+        $sections = [];
+
+        foreach (self::LISTING_KINDS as $kind) {
+            $sections[$kind] = array_merge(config('listing.kinds.'.$kind, []), [
+                'preview_route' => 'listings.index',
+                'preview_params' => ['kind' => $kind],
+            ]);
+        }
+
+        foreach (config('portal.page_banners', []) as $context => $meta) {
+            $sections[$context] = $meta;
+        }
+
+        return $sections;
+    }
+
+    public static function bannerSectionLabel(string $context): string
+    {
+        $sections = self::bannerSections();
+
+        return $sections[$context]['nav_label']
+            ?? $sections[$context]['label']
+            ?? ucfirst(str_replace('-', ' ', $context));
+    }
+
+    /**
      * @return array<int, array{image: string, alt: string|null, url: string|null}>
      */
     public static function slidesForPortal(): array
@@ -53,11 +110,19 @@ class HeroCarouselBanner extends Model
      */
     public static function slidesForListingKind(?string $kind): array
     {
-        if (! $kind || ! self::isListingKind($kind)) {
+        return self::slidesForBannerContext($kind ?? '');
+    }
+
+    /**
+     * @return array<int, array{image: string, alt: string|null, url: string|null}>
+     */
+    public static function slidesForBannerContext(string $context): array
+    {
+        if (! self::isBannerContext($context)) {
             return [];
         }
 
-        return static::slidesForContext($kind, [], self::LISTING_MAX_BANNERS);
+        return static::slidesForContext($context, [], self::LISTING_MAX_BANNERS);
     }
 
     /**

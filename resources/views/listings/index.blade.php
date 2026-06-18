@@ -13,7 +13,7 @@
                 <h2 class="refine-sidebar__title">Refine</h2>
             </header>
 
-            <form method="get" action="{{ route('listings.index') }}" class="refine-sidebar__filters">
+            <form method="get" action="{{ $formAction ?? route('listings.index') }}" class="refine-sidebar__filters">
                 <div class="refine-field">
                     <label class="refine-field__label" for="q2">Keyword</label>
                     <div class="refine-field__control">
@@ -36,15 +36,34 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                     Apply filters
                 </button>
-                @foreach(['kind', 'subtype', 'quick'] as $hidden)
-                    @if(!empty($filters[$hidden]))
-                        <input type="hidden" name="{{ $hidden }}" value="{{ $filters[$hidden] }}">
+                @if(($browseContext ?? null) === 'lands')
+                    @if(!empty($filters['kind']))
+                        <input type="hidden" name="kind" value="{{ $filters['kind'] }}">
                     @endif
-                @endforeach
+                @else
+                    @foreach(['kind', 'subtype', 'quick'] as $hidden)
+                        @if(!empty($filters[$hidden]))
+                            <input type="hidden" name="{{ $hidden }}" value="{{ $filters[$hidden] }}">
+                        @endif
+                    @endforeach
+                @endif
             </form>
 
-            @php($activeKind = $filters['kind'] ?? null)
-            @if($activeKind && isset($kinds[$activeKind]))
+            @if(($browseContext ?? null) === 'lands')
+                <div class="refine-sidebar__divider" aria-hidden="true"></div>
+                <div class="refine-sidebar__types">
+                    <h3 class="refine-sidebar__types-label">Land listings</h3>
+                    <div class="refine-type-chips">
+                        @php($landChipParams = array_filter(['q' => $filters['q'] ?? null, 'city' => $filters['city'] ?? null]))
+                        <a href="{{ route('lands.index', $landChipParams) }}"
+                           class="refine-type-chip{{ empty($filters['kind']) ? ' is-active' : '' }}">All lands</a>
+                        <a href="{{ route('lands.index', array_merge($landChipParams, ['kind' => 'sale'])) }}"
+                           class="refine-type-chip{{ ($filters['kind'] ?? null) === 'sale' ? ' is-active' : '' }}">For sale</a>
+                        <a href="{{ route('lands.index', array_merge($landChipParams, ['kind' => 'rental'])) }}"
+                           class="refine-type-chip{{ ($filters['kind'] ?? null) === 'rental' ? ' is-active' : '' }}">For rent</a>
+                    </div>
+                </div>
+            @elseif($activeKind && isset($kinds[$activeKind]))
                 <div class="refine-sidebar__divider" aria-hidden="true"></div>
                 <div class="refine-sidebar__types">
                     <h3 class="refine-sidebar__types-label">Types in this category</h3>
@@ -64,7 +83,7 @@
                     <x-hero-carousel
                         :slides="$categoryCarousel"
                         modifier="listings"
-                        :label="($kinds[$activeKind]['nav_label'] ?? 'Listings').' banners'"
+                        :label="(($browseContext ?? null) === 'lands' ? 'Lands' : ($kinds[$activeKind]['nav_label'] ?? 'Listings')).' banners'"
                     />
                 </div>
             @endif
@@ -87,7 +106,16 @@
                                 <h2 class="property-card__title">
                                     <a href="{{ route('listings.show', $listing) }}">{{ $listing->title }}</a>
                                 </h2>
-                                @if($listing->bedrooms !== null || $listing->built_area_sqft)
+                                @if($listing->landSizeLabel() || $listing->built_area_sqft)
+                                    <div class="muted" style="font-size:0.82rem;margin-bottom:6px">
+                                        @if($listing->landSizeLabel())
+                                            {{ $listing->landSizeLabel() }}
+                                        @endif
+                                        @if($listing->built_area_sqft)
+                                            @if($listing->landSizeLabel()) · @endif{{ number_format($listing->built_area_sqft) }} sq.ft.
+                                        @endif
+                                    </div>
+                                @elseif($listing->bedrooms !== null || $listing->built_area_sqft)
                                     <div class="muted" style="font-size:0.82rem;margin-bottom:6px">
                                         @if($listing->bedrooms !== null)
                                             {{ $listing->bedrooms >= 5 ? '5+ BHK' : $listing->bedrooms.' BHK' }}

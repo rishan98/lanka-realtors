@@ -60,9 +60,17 @@
                     @endif
                 </div>
 
-                <div class="listing-detail__gallery" data-listing-gallery>
+                <div class="listing-detail__gallery" data-listing-gallery tabindex="0">
                     <div class="listing-detail__gallery-main">
                         <img src="{{ $images[0] }}" alt="{{ $listing->title }}" id="listing-gallery-main" class="listing-detail__gallery-image">
+                        @if(count($images) > 1)
+                            <button type="button" class="listing-detail__gallery-nav listing-detail__gallery-nav--prev" data-gallery-prev aria-label="Previous photo">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+                            </button>
+                            <button type="button" class="listing-detail__gallery-nav listing-detail__gallery-nav--next" data-gallery-next aria-label="Next photo">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                            </button>
+                        @endif
                         <span class="listing-detail__photo-count">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                             {{ count($images) }} Photo{{ count($images) === 1 ? '' : 's' }}
@@ -204,15 +212,57 @@
     var gallery = document.querySelector('[data-listing-gallery]');
     if (gallery) {
         var main = document.getElementById('listing-gallery-main');
-        gallery.querySelectorAll('[data-gallery-src]').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                if (!main) return;
-                main.src = btn.getAttribute('data-gallery-src');
-                gallery.querySelectorAll('.listing-detail__thumb').forEach(function (t) {
-                    t.classList.remove('is-active');
-                });
-                btn.classList.add('is-active');
+        var thumbs = Array.prototype.slice.call(gallery.querySelectorAll('[data-gallery-src]'));
+        var currentIndex = 0;
+
+        function showGalleryImage(index) {
+            if (!main || !thumbs.length) {
+                return;
+            }
+
+            if (index < 0) {
+                index = thumbs.length - 1;
+            } else if (index >= thumbs.length) {
+                index = 0;
+            }
+
+            currentIndex = index;
+            var btn = thumbs[index];
+            main.src = btn.getAttribute('data-gallery-src');
+            thumbs.forEach(function (t) {
+                t.classList.remove('is-active');
             });
+            btn.classList.add('is-active');
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        }
+
+        thumbs.forEach(function (btn, index) {
+            btn.addEventListener('click', function () {
+                showGalleryImage(index);
+            });
+        });
+
+        var prevBtn = gallery.querySelector('[data-gallery-prev]');
+        var nextBtn = gallery.querySelector('[data-gallery-next]');
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', function () {
+                showGalleryImage(currentIndex - 1);
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function () {
+                showGalleryImage(currentIndex + 1);
+            });
+        }
+
+        gallery.addEventListener('keydown', function (event) {
+            if (event.key === 'ArrowLeft') {
+                showGalleryImage(currentIndex - 1);
+            } else if (event.key === 'ArrowRight') {
+                showGalleryImage(currentIndex + 1);
+            }
         });
     }
 

@@ -7,6 +7,16 @@
 @section('content')
 <section class="section section--tight">
     <div class="container">
+        @if(! empty($categoryCarousel))
+            <div class="listings-banner mb-3">
+                <x-hero-carousel
+                    :slides="$categoryCarousel"
+                    modifier="listings"
+                    label="Find realtor banners"
+                />
+            </div>
+        @endif
+
         <h1 class="section-title">Find the realtor</h1>
         <p class="section-lead">Agents with active inventory rise to the top—pick someone who is actively closing deals in your segment.</p>
 
@@ -24,3 +34,9 @@
     </div>
 </section>
 @endsection
+
+@if(! empty($categoryCarousel ?? []))
+    @push('scripts')
+        @include('partials.hero-carousel-script')
+    @endpush
+@endif

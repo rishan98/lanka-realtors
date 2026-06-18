@@ -28,7 +28,7 @@
 
     <div class="row-flex" style="gap:12px;flex-wrap:wrap;margin-top:1rem">
         <button type="submit" class="btn-gold">Save banner</button>
-        <a class="pill" href="{{ route('listings.index', ['kind' => $kind]) }}" target="_blank" rel="noopener">Preview listings</a>
+        <a class="pill" href="{{ route($kindMeta['preview_route'], $kindMeta['preview_params'] ?? []) }}" target="_blank" rel="noopener">Preview page</a>
     </div>
 </form>
 @endsection

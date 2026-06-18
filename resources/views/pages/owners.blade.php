@@ -56,6 +56,16 @@
         </aside>
 
         <div>
+            @if(! empty($categoryCarousel))
+                <div class="listings-banner mb-3">
+                    <x-hero-carousel
+                        :slides="$categoryCarousel"
+                        modifier="listings"
+                        label="Owners banners"
+                    />
+                </div>
+            @endif
+
             <header class="mb-3">
                 <h1 class="section-title">Owners</h1>
                 <p class="section-lead">Only property ads posted by registered owners appear here — not agent listings.</p>
@@ -117,3 +127,9 @@
     </div>
 </section>
 @endsection
+
+@if(! empty($categoryCarousel ?? []))
+    @push('scripts')
+        @include('partials.hero-carousel-script')
+    @endpush
+@endif

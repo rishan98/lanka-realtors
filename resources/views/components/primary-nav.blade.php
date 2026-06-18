@@ -3,10 +3,12 @@
 
     if (request()->routeIs('listings.index') && request()->filled('kind')) {
         $activeNavKind = request('kind');
+    } elseif (request()->routeIs('lands.index')) {
+        $activeNavKind = 'lands';
     } elseif (request()->routeIs('listings.show')) {
         $listing = request()->route('listing');
         if ($listing instanceof \App\Models\Listing) {
-            $activeNavKind = $listing->listing_kind;
+            $activeNavKind = $listing->property_subtype === 'land' ? 'lands' : $listing->listing_kind;
         }
     } elseif (request()->routeIs('projects')) {
         $activeNavKind = 'projects';
@@ -23,6 +25,7 @@
     <a href="{{ route('portal.home') }}" class="{{ trim($navRouteActive('portal.home')) }}" @if(request()->routeIs('portal.home')) aria-current="page" @endif>Home</a>
     <a href="{{ route('listings.index', ['kind' => 'sale']) }}" class="{{ trim($navActive('sale')) }}" @if($activeNavKind === 'sale') aria-current="page" @endif>Sales</a>
     <a href="{{ route('listings.index', ['kind' => 'rental']) }}" class="{{ trim($navActive('rental')) }}" @if($activeNavKind === 'rental') aria-current="page" @endif>Rental</a>
+    <a href="{{ route('lands.index') }}" class="{{ trim($navActive('lands')) }}" @if($activeNavKind === 'lands') aria-current="page" @endif>Lands</a>
     <a href="{{ route('listings.index', ['kind' => 'projects']) }}" class="{{ trim($navActive('projects')) }}" @if($activeNavKind === 'projects') aria-current="page" @endif>Projects</a>
     <a href="{{ route('listings.index', ['kind' => 'wanted']) }}" class="{{ trim($navActive('wanted')) }}" @if($activeNavKind === 'wanted') aria-current="page" @endif>Wanted</a>
     <a href="{{ route('locate') }}" class="{{ trim($navRouteActive('locate')) }}" @if(request()->routeIs('locate')) aria-current="page" @endif>Locate me</a>

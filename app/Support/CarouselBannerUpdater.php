@@ -4,7 +4,6 @@ namespace App\Support;
 
 use App\Models\HeroCarouselBanner;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class CarouselBannerUpdater
@@ -65,7 +64,6 @@ class CarouselBannerUpdater
 
             if ($remove) {
                 if ($banner) {
-                    Storage::disk('public')->delete($banner->image_path);
                     $banner->delete();
                 }
 
@@ -73,10 +71,6 @@ class CarouselBannerUpdater
             }
 
             if ($request->hasFile("banners.{$position}.image")) {
-                if ($banner) {
-                    Storage::disk('public')->delete($banner->image_path);
-                }
-
                 $imagePath = $request->file("banners.{$position}.image")
                     ->store('hero-banners/'.$context, 'public');
 
@@ -109,9 +103,6 @@ class CarouselBannerUpdater
             ->where('context', $context)
             ->where('position', '>', $maxBanners)
             ->get()
-            ->each(function (HeroCarouselBanner $banner) {
-                Storage::disk('public')->delete($banner->image_path);
-                $banner->delete();
-            });
+            ->each->delete();
     }
 }

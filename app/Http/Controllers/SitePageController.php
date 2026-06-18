@@ -33,7 +33,10 @@ class SitePageController extends Controller
             ->orderedByRating()
             ->get();
 
-        return view('pages.find-realtor', compact('agents'));
+        return view('pages.find-realtor', [
+            'agents' => $agents,
+            'categoryCarousel' => \App\Models\HeroCarouselBanner::slidesForBannerContext('find-realtor'),
+        ]);
     }
 
     public function owners(Request $request)
@@ -77,6 +80,7 @@ class SitePageController extends Controller
             'kinds' => config('listing.kinds'),
             'districts' => City::districtsForForms(),
             'filters' => $filters,
+            'categoryCarousel' => \App\Models\HeroCarouselBanner::slidesForBannerContext('owners'),
         ]);
     }
 

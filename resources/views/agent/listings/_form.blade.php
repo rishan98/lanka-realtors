@@ -10,21 +10,27 @@
     <section class="listing-form__section">
         <header class="listing-form__section-head">
             <h2 class="listing-form__section-title">Category</h2>
-            <p class="listing-form__section-lead">Choose the listing type and property category.</p>
+            <p class="listing-form__section-lead">{{ $isEdit ? 'Category and property type are fixed after the listing is created.' : 'Choose the listing type and property category.' }}</p>
         </header>
         <div class="listing-form__grid listing-form__grid--2">
             <div class="field">
                 <label for="listing_kind">Category</label>
-                <select class="input" id="listing_kind" name="listing_kind" required>
+                <select class="input" id="listing_kind" @unless($isEdit) name="listing_kind" @endunless @if($isEdit) disabled @endif required>
                     @foreach($kinds as $key => $meta)
                         <option value="{{ $key }}" {{ old('listing_kind', $listing->listing_kind ?? 'sale') === $key ? 'selected' : '' }}>{{ $meta['label'] }}</option>
                     @endforeach
                 </select>
+                @if($isEdit)
+                    <input type="hidden" name="listing_kind" value="{{ old('listing_kind', $listing->listing_kind) }}">
+                @endif
                 @error('listing_kind')<div class="error-text">{{ $message }}</div>@enderror
             </div>
             <div class="field">
                 <label for="property_subtype">Property type</label>
-                <select class="input" id="property_subtype" name="property_subtype" required></select>
+                <select class="input" id="property_subtype" @unless($isEdit) name="property_subtype" @endunless @if($isEdit) disabled @endif required></select>
+                @if($isEdit)
+                    <input type="hidden" name="property_subtype" value="{{ old('property_subtype', $listing->property_subtype) }}">
+                @endif
                 @error('property_subtype')<div class="error-text">{{ $message }}</div>@enderror
             </div>
         </div>
@@ -45,6 +51,16 @@
                 <label for="description">Description</label>
                 <textarea class="input @error('description') is-invalid @enderror" id="description" name="description" rows="6" placeholder="Highlight key features, nearby amenities, and anything buyers should know.">{{ old('description', $listing->description) }}</textarea>
                 @error('description')<div class="error-text">{{ $message }}</div>@enderror
+            </div>
+            <div class="field" data-field="property_status">
+                <label for="property_status">Property status</label>
+                <select class="input @error('property_status') is-invalid @enderror" id="property_status" name="property_status">
+                    <option value="">Select status</option>
+                    @foreach(($propertyStatusOptions ?? config('listing.property_status_options', [])) as $key => $label)
+                        <option value="{{ $key }}" {{ old('property_status', $listing->property_status) === $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+                @error('property_status')<div class="error-text">{{ $message }}</div>@enderror
             </div>
         </div>
     </section>
@@ -96,7 +112,7 @@
         </div>
     </section>
 
-    <section class="listing-form__section">
+    <section class="listing-form__section" id="listing-specifications-section" data-section-fields="bedrooms,bathrooms,floors,land_size,land_size_unit,built_area_sqft">
         <header class="listing-form__section-head">
             <h2 class="listing-form__section-title">Property specifications</h2>
             <p class="listing-form__section-lead">Add size and layout details. Fields change based on property type.</p>
@@ -144,7 +160,7 @@
         </div>
     </section>
 
-    <section class="listing-form__section">
+    <section class="listing-form__section" id="listing-pricing-section" data-section-fields="price">
         <header class="listing-form__section-head">
             <h2 class="listing-form__section-title">Pricing</h2>
             <p class="listing-form__section-lead">Set the asking price shown on your listing.</p>
@@ -162,10 +178,10 @@
         </div>
     </section>
 
-    <section class="listing-form__section">
+    <section class="listing-form__section" id="listing-features-section" data-section-fields="furnishing_status,parking_available,advance_payment_months,deposit_months,short_term_available,bills_included">
         <header class="listing-form__section-head">
-            <h2 class="listing-form__section-title">Features &amp; rental terms</h2>
-            <p class="listing-form__section-lead">Optional details that help buyers compare properties.</p>
+            <h2 class="listing-form__section-title" id="listing-features-title">Features</h2>
+            <p class="listing-form__section-lead" id="listing-features-lead">Optional details that help buyers compare properties.</p>
         </header>
         <div class="listing-form__stack">
             <div class="listing-form__grid listing-form__grid--2" data-fields="furnishing_status,parking_available">
@@ -225,7 +241,7 @@
     <section class="listing-form__section">
         <header class="listing-form__section-head">
             <h2 class="listing-form__section-title">Photos</h2>
-            <p class="listing-form__section-lead" id="listing-photos-lead">Upload up to {{ $maxImages }} clear photos. The first image is used as the cover.</p>
+            <p class="listing-form__section-lead" id="listing-photos-lead">Upload up to {{ $maxImages }} clear photos. Drag to reorder — the first image is used as the cover.</p>
         </header>
         <div class="listing-form__stack">
             <div class="field listing-form__upload" data-field="images">
@@ -242,16 +258,10 @@
                     </label>
                     <input class="listing-form__upload-input{{ ($errors->has('images') || $errors->has('images.*')) ? ' is-invalid' : '' }}" id="images" name="images[]" type="file" accept="image/jpeg,image/png,image/webp,image/jpg" multiple>
                 </div>
-                <div class="listing-form__previews" id="listing-image-previews" hidden></div>
-                @error('images')<div class="error-text">{{ $message }}</div>@enderror
-                @error('images.*')<div class="error-text">{{ $message }}</div>@enderror
-            </div>
-
-            @if($isEdit && count($listing->resolvedImagePaths()))
-                @php($removedImages = old('removed_images', []))
-                <div data-field="images" id="listing-existing-images">
-                    <p class="listing-form__current-label">Current images (<span id="listing-existing-count">{{ count($listing->resolvedImagePaths()) - count($removedImages) }}</span>)</p>
-                    <div class="listing-form__previews" id="listing-existing-previews">
+                <div id="listing-image-order-inputs"></div>
+                <div class="listing-form__previews" id="listing-image-gallery" @if(!$isEdit || !count($listing->resolvedImagePaths())) hidden @endif>
+                    @if($isEdit)
+                        @php($removedImages = old('removed_images', []))
                         @foreach($listing->resolvedImagePaths() as $index => $path)
                             <div class="listing-form__preview" data-existing-path="{{ $path }}" @if(in_array($path, $removedImages, true)) hidden @endif>
                                 <img src="{{ asset('storage/'.$path) }}" alt="">
@@ -259,9 +269,17 @@
                                 <button type="button" class="listing-form__preview-remove" aria-label="Remove photo">&times;</button>
                             </div>
                         @endforeach
-                    </div>
+                    @endif
+                </div>
+                @error('images')<div class="error-text">{{ $message }}</div>@enderror
+                @error('images.*')<div class="error-text">{{ $message }}</div>@enderror
+            </div>
+
+            @if($isEdit && count($listing->resolvedImagePaths()))
+                <div data-field="images" id="listing-existing-images">
+                    <p class="listing-form__current-label">Current images (<span id="listing-existing-count">{{ count($listing->resolvedImagePaths()) - count(old('removed_images', [])) }}</span>)</p>
                     <div id="listing-removed-images-inputs"></div>
-                    <p class="listing-form__hint">Remove photos with × or upload additional images above.</p>
+                    <p class="listing-form__hint">Drag photos to reorder · remove with × · upload additional images above.</p>
                 </div>
             @endif
         </div>
@@ -289,6 +307,7 @@
 <script type="application/json" id="kind-fields-data">{!! json_encode($kindFields) !!}</script>
 <script type="application/json" id="required-fields-data">{!! json_encode($requiredFields) !!}</script>
 <script type="application/json" id="land-hidden-fields-data">{!! json_encode(config('listing.land_hidden_fields')) !!}</script>
+<script type="application/json" id="compact-property-hidden-fields-data">{!! json_encode(config('listing.compact_property_hidden_fields')) !!}</script>
 <script type="application/json" id="districts-data">@json($districtOptions ?? [])</script>
 <script>
 (function () {
@@ -296,6 +315,7 @@
     var kindFields = JSON.parse(document.getElementById('kind-fields-data').textContent);
     var requiredFields = JSON.parse(document.getElementById('required-fields-data').textContent);
     var landHiddenFields = JSON.parse(document.getElementById('land-hidden-fields-data').textContent);
+    var compactPropertyHiddenFields = JSON.parse(document.getElementById('compact-property-hidden-fields-data').textContent);
     var kindEl = document.getElementById('listing_kind');
     var subEl = document.getElementById('property_subtype');
     var formEl = document.getElementById('listing-form');
@@ -327,6 +347,10 @@
         return subEl.value === 'land';
     }
 
+    function isCompactPropertyContext() {
+        return kindEl.value === 'projects' || subEl.value === 'apartment';
+    }
+
     function fieldVisible(fields, name) {
         if (fields.indexOf(name) === -1) {
             return false;
@@ -334,7 +358,104 @@
         if (isLandSubtype() && landHiddenFields.indexOf(name) !== -1) {
             return false;
         }
+        if (isCompactPropertyContext() && compactPropertyHiddenFields.indexOf(name) !== -1) {
+            return false;
+        }
         return true;
+    }
+
+    function sectionHasVisibleFields(fields, fieldNames) {
+        return fieldNames.some(function (name) {
+            return fieldVisible(fields, name);
+        });
+    }
+
+    function updateFormSections() {
+        var fields = kindFields[kindEl.value] || [];
+
+        formEl.querySelectorAll('[data-section-fields]').forEach(function (sectionEl) {
+            var names = sectionEl.getAttribute('data-section-fields').split(',').map(function (name) {
+                return name.trim();
+            });
+            sectionEl.style.display = sectionHasVisibleFields(fields, names) ? '' : 'none';
+        });
+    }
+
+    function updateFeaturesSection() {
+        var kind = kindEl.value;
+        var fields = kindFields[kind] || [];
+        var featureFieldNames = [
+            'furnishing_status',
+            'parking_available',
+            'advance_payment_months',
+            'deposit_months',
+            'short_term_available',
+            'bills_included'
+        ];
+        var hasFeatures = sectionHasVisibleFields(fields, featureFieldNames);
+        var featuresTitleEl = document.getElementById('listing-features-title');
+        var featuresLeadEl = document.getElementById('listing-features-lead');
+        var featureCopy = {
+            sale: {
+                title: 'Features',
+                lead: 'Optional details that help buyers compare properties.'
+            },
+            rental: {
+                title: 'Features & rental terms',
+                lead: 'Optional furnishing and tenancy details for renters.'
+            },
+            projects: {
+                title: 'Project features',
+                lead: 'Optional details about this development that help buyers compare units.'
+            }
+        };
+
+        if (!hasFeatures || !featuresTitleEl || !featuresLeadEl) {
+            return;
+        }
+
+        var copy = featureCopy[kind] || featureCopy.sale;
+        featuresTitleEl.textContent = copy.title;
+        featuresLeadEl.textContent = copy.lead;
+    }
+
+    function setLabelRequired(label, isRequired) {
+        if (!label) {
+            return;
+        }
+
+        var target = label.querySelector('.listing-form__upload-text') || label;
+        var marker = target.querySelector('.listing-form__required');
+
+        if (!marker) {
+            marker = document.createElement('span');
+            marker.className = 'listing-form__required';
+            marker.setAttribute('aria-hidden', 'true');
+            marker.textContent = '*';
+            target.appendChild(document.createTextNode(' '));
+            target.appendChild(marker);
+        }
+
+        marker.hidden = !isRequired;
+    }
+
+    function updateRequiredMarkers() {
+        formEl.querySelectorAll('label[for]').forEach(function (label) {
+            var forId = label.getAttribute('for');
+            var isRequired = false;
+
+            if (forId === 'listing_district') {
+                var kind = kindEl.value;
+                var fields = kindFields[kind] || [];
+                var required = requiredFields[kind] || [];
+                isRequired = fieldVisible(fields, 'city_id') && required.indexOf('city_id') !== -1;
+            } else {
+                var input = document.getElementById(forId);
+                isRequired = input ? input.required : false;
+            }
+
+            setLabelRequired(label, isRequired);
+        });
     }
 
     function updateFields() {
@@ -367,9 +488,16 @@
             });
             row.style.display = showRow ? '' : 'none';
         });
+
+        updateFormSections();
+        updateFeaturesSection();
+        updateRequiredMarkers();
     }
 
     kindEl.addEventListener('change', function () {
+        if (isEdit) {
+            return;
+        }
         oldSubtype = null;
         fillSubtypes();
         updateFields();
@@ -429,26 +557,40 @@
 
     var imagesInput = document.getElementById('images');
     var uploadHint = document.getElementById('listing-upload-hint');
-    var previewEl = document.getElementById('listing-image-previews');
+    var galleryEl = document.getElementById('listing-image-gallery');
+    var orderInputsEl = document.getElementById('listing-image-order-inputs');
     var maxImagesByKind = @json($maxImagesByKind ?? []);
     var defaultMaxImages = @json($defaultMaxImages ?? 10);
     var maxImages = defaultMaxImages;
     var selectedFiles = [];
-    var previewUrls = [];
     var photosLeadEl = document.getElementById('listing-photos-lead');
     var uploadMaxEl = document.getElementById('listing-upload-max');
     var uploadMaxLabelEl = document.getElementById('listing-upload-max-label');
     var requireImageHint = @json(!$isEdit);
-    var existingPreviewsEl = document.getElementById('listing-existing-previews');
     var removedInputsEl = document.getElementById('listing-removed-images-inputs');
     var removedPaths = new Set(@json(old('removed_images', [])));
+    var dragItem = null;
 
     function existingTotalCount() {
-        if (!existingPreviewsEl) {
+        if (!galleryEl) {
             return 0;
         }
 
-        return existingPreviewsEl.querySelectorAll('[data-existing-path]').length;
+        return galleryEl.querySelectorAll('[data-existing-path]').length;
+    }
+
+    function getVisibleGalleryItems() {
+        if (!galleryEl) {
+            return [];
+        }
+
+        return Array.prototype.slice.call(
+            galleryEl.querySelectorAll('.listing-form__preview:not([hidden])')
+        );
+    }
+
+    function galleryVisibleCount() {
+        return getVisibleGalleryItems().length;
     }
 
     function existingRemainingCount() {
@@ -461,6 +603,90 @@
         }
 
         return Math.max(0, maxImages - existingRemainingCount());
+    }
+
+    function updateGalleryVisibility() {
+        if (!galleryEl) {
+            return;
+        }
+
+        galleryEl.hidden = galleryVisibleCount() === 0;
+    }
+
+    function updatePreviewBadges() {
+        getVisibleGalleryItems().forEach(function (item, index) {
+            var badge = item.querySelector('.listing-form__preview-badge');
+            if (badge) {
+                badge.textContent = index === 0 ? 'Cover' : 'Photo ' + (index + 1);
+            }
+        });
+    }
+
+    function updateGalleryDraggable() {
+        if (!galleryEl) {
+            return;
+        }
+
+        var canReorder = maxImages > 1 && galleryVisibleCount() > 1;
+        getVisibleGalleryItems().forEach(function (item) {
+            if (canReorder) {
+                item.setAttribute('draggable', 'true');
+            } else {
+                item.removeAttribute('draggable');
+            }
+        });
+    }
+
+    function syncImageOrderInputs() {
+        if (!isEdit || !orderInputsEl) {
+            return;
+        }
+
+        orderInputsEl.innerHTML = '';
+        var newIndex = 0;
+
+        getVisibleGalleryItems().forEach(function (item) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'image_order[]';
+
+            if (item.hasAttribute('data-existing-path')) {
+                input.value = item.getAttribute('data-existing-path');
+            } else {
+                input.value = 'new:' + newIndex;
+                newIndex += 1;
+            }
+
+            orderInputsEl.appendChild(input);
+        });
+    }
+
+    function syncFilesFromGallery() {
+        var nextFiles = [];
+
+        getVisibleGalleryItems().forEach(function (item) {
+            var key = item.getAttribute('data-new-key');
+            if (!key) {
+                return;
+            }
+
+            selectedFiles.forEach(function (file) {
+                if (fileKey(file) === key) {
+                    nextFiles.push(file);
+                }
+            });
+        });
+
+        selectedFiles = nextFiles;
+    }
+
+    function onGalleryOrderChanged() {
+        syncFilesFromGallery();
+        syncInputFiles(true);
+        updatePreviewBadges();
+        syncImageOrderInputs();
+        updateGalleryDraggable();
+        updateFields();
     }
 
     function syncRemovedInputs() {
@@ -482,6 +708,10 @@
             countEl.textContent = String(existingRemainingCount());
         }
 
+        updateGalleryVisibility();
+        updatePreviewBadges();
+        syncImageOrderInputs();
+        updateGalleryDraggable();
         updateFields();
         updateUploadHint();
     }
@@ -495,12 +725,71 @@
         if (selectedFiles.length > allowed) {
             selectedFiles = selectedFiles.slice(0, allowed);
             window.alert('You can upload a maximum of ' + maxImages + ' image' + (maxImages === 1 ? '' : 's') + ' for this category.');
-            syncInputFiles();
+            applySelectedFiles();
         }
     }
 
-    if (existingPreviewsEl) {
-        existingPreviewsEl.addEventListener('click', function (event) {
+    function removeNewPreview(key) {
+        selectedFiles = selectedFiles.filter(function (file) {
+            return fileKey(file) !== key;
+        });
+
+        if (galleryEl) {
+            galleryEl.querySelectorAll('[data-new-key]').forEach(function (item) {
+                if (item.getAttribute('data-new-key') !== key) {
+                    return;
+                }
+
+                var previewUrl = item.getAttribute('data-preview-url');
+                if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                }
+                item.remove();
+            });
+        }
+
+        syncInputFiles(true);
+        updateGalleryVisibility();
+        updatePreviewBadges();
+        syncImageOrderInputs();
+        updateGalleryDraggable();
+        updateFields();
+        updateUploadHint();
+    }
+
+    function createNewPreviewItem(file) {
+        var key = fileKey(file);
+        var item = document.createElement('div');
+        item.className = 'listing-form__preview';
+        item.setAttribute('data-new-key', key);
+
+        var img = document.createElement('img');
+        var objectUrl = URL.createObjectURL(file);
+        item.setAttribute('data-preview-url', objectUrl);
+        img.src = objectUrl;
+        img.alt = file.name;
+
+        var label = document.createElement('span');
+        label.className = 'listing-form__preview-badge';
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'listing-form__preview-remove';
+        removeBtn.setAttribute('aria-label', 'Remove ' + file.name);
+        removeBtn.innerHTML = '&times;';
+        removeBtn.addEventListener('click', function () {
+            removeNewPreview(key);
+        });
+
+        item.appendChild(img);
+        item.appendChild(label);
+        item.appendChild(removeBtn);
+
+        return item;
+    }
+
+    if (galleryEl) {
+        galleryEl.addEventListener('click', function (event) {
             var button = event.target.closest('.listing-form__preview-remove');
             if (!button) {
                 return;
@@ -512,6 +801,55 @@
             }
 
             markExistingImageRemoved(item.getAttribute('data-existing-path'), item);
+        });
+
+        galleryEl.addEventListener('dragstart', function (event) {
+            var item = event.target.closest('.listing-form__preview');
+            if (!item || event.target.closest('.listing-form__preview-remove') || galleryVisibleCount() < 2) {
+                event.preventDefault();
+                return;
+            }
+
+            dragItem = item;
+            item.classList.add('listing-form__preview--dragging');
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', item.getAttribute('data-existing-path') || item.getAttribute('data-new-key') || '');
+        });
+
+        galleryEl.addEventListener('dragend', function () {
+            if (dragItem) {
+                dragItem.classList.remove('listing-form__preview--dragging');
+            }
+            dragItem = null;
+        });
+
+        galleryEl.addEventListener('dragover', function (event) {
+            if (!dragItem) {
+                return;
+            }
+
+            event.preventDefault();
+            var over = event.target.closest('.listing-form__preview:not([hidden])');
+            if (!over || over === dragItem) {
+                return;
+            }
+
+            var rect = over.getBoundingClientRect();
+            var midpoint = rect.left + rect.width / 2;
+            if (event.clientX < midpoint) {
+                galleryEl.insertBefore(dragItem, over);
+            } else {
+                galleryEl.insertBefore(dragItem, over.nextSibling);
+            }
+        });
+
+        galleryEl.addEventListener('drop', function (event) {
+            event.preventDefault();
+            if (!dragItem) {
+                return;
+            }
+
+            onGalleryOrderChanged();
         });
 
         syncRemovedInputs();
@@ -540,7 +878,7 @@
         if (photosLeadEl) {
             photosLeadEl.textContent = maxImages === 1
                 ? 'Upload one clear photo for your wanted ad.'
-                : 'Upload up to ' + maxImages + ' clear photos. The first image is used as the cover.';
+                : 'Upload up to ' + maxImages + ' clear photos. Drag to reorder — the first image is used as the cover.';
         }
 
         if (uploadMaxEl) {
@@ -554,9 +892,10 @@
         if (selectedFiles.length > effectiveMaxFiles()) {
             selectedFiles = selectedFiles.slice(0, effectiveMaxFiles());
             window.alert('You can upload a maximum of ' + maxImages + ' image' + (maxImages === 1 ? '' : 's') + ' for this category.');
-            syncInputFiles();
+            applySelectedFiles();
         } else {
             updateUploadHint();
+            updateGalleryDraggable();
         }
     }
 
@@ -587,14 +926,56 @@
         return file.name + '|' + file.size + '|' + file.lastModified;
     }
 
-    function revokePreviewUrls() {
-        previewUrls.forEach(function (url) {
-            URL.revokeObjectURL(url);
+    function appendMissingNewPreviews() {
+        if (!galleryEl) {
+            return;
+        }
+
+        selectedFiles.forEach(function (file) {
+            var key = fileKey(file);
+            var exists = getVisibleGalleryItems().some(function (item) {
+                return item.getAttribute('data-new-key') === key;
+            });
+
+            if (!exists) {
+                galleryEl.appendChild(createNewPreviewItem(file));
+            }
         });
-        previewUrls = [];
+
+        updateGalleryVisibility();
     }
 
-    function syncInputFiles() {
+    function pruneNewPreviews() {
+        if (!galleryEl) {
+            return;
+        }
+
+        galleryEl.querySelectorAll('[data-new-key]').forEach(function (item) {
+            var key = item.getAttribute('data-new-key');
+            var kept = selectedFiles.some(function (file) {
+                return fileKey(file) === key;
+            });
+
+            if (!kept) {
+                var previewUrl = item.getAttribute('data-preview-url');
+                if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                }
+                item.remove();
+            }
+        });
+
+        updateGalleryVisibility();
+    }
+
+    function applySelectedFiles() {
+        pruneNewPreviews();
+        appendMissingNewPreviews();
+        syncInputFiles(true);
+        onGalleryOrderChanged();
+    }
+
+    function syncInputFiles(skipRender) {
         if (!imagesInput) {
             return;
         }
@@ -609,53 +990,32 @@
             updateUploadHint();
         }
 
-        renderPreviews();
+        if (!skipRender) {
+            renderNewPreviews();
+        }
     }
 
-    function renderPreviews() {
-        if (!previewEl) {
+    function renderNewPreviews() {
+        if (!galleryEl) {
             return;
         }
 
-        revokePreviewUrls();
-        previewEl.innerHTML = '';
-
-        if (selectedFiles.length === 0) {
-            previewEl.hidden = true;
-            return;
-        }
-
-        previewEl.hidden = false;
-
-        selectedFiles.forEach(function (file, index) {
-            var item = document.createElement('div');
-            item.className = 'listing-form__preview';
-
-            var img = document.createElement('img');
-            var objectUrl = URL.createObjectURL(file);
-            previewUrls.push(objectUrl);
-            img.src = objectUrl;
-            img.alt = file.name;
-
-            var label = document.createElement('span');
-            label.className = 'listing-form__preview-badge';
-            label.textContent = index === 0 ? 'Cover' : 'Photo ' + (index + 1);
-
-            var removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'listing-form__preview-remove';
-            removeBtn.setAttribute('aria-label', 'Remove ' + file.name);
-            removeBtn.innerHTML = '&times;';
-            removeBtn.addEventListener('click', function () {
-                selectedFiles.splice(index, 1);
-                syncInputFiles();
-            });
-
-            item.appendChild(img);
-            item.appendChild(label);
-            item.appendChild(removeBtn);
-            previewEl.appendChild(item);
+        galleryEl.querySelectorAll('[data-new-key]').forEach(function (item) {
+            var previewUrl = item.getAttribute('data-preview-url');
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+            item.remove();
         });
+
+        selectedFiles.forEach(function (file) {
+            galleryEl.appendChild(createNewPreviewItem(file));
+        });
+
+        updateGalleryVisibility();
+        updatePreviewBadges();
+        syncImageOrderInputs();
+        updateGalleryDraggable();
     }
 
     if (imagesInput) {
@@ -667,37 +1027,49 @@
 
             if (allowed === 0) {
                 selectedFiles = [];
+                pruneNewPreviews();
+                syncInputFiles(true);
+                updateUploadHint();
                 window.alert('Remove an existing photo before uploading a new one.');
-                syncInputFiles();
                 return;
             }
 
             if (allowed === 1) {
                 selectedFiles = incoming.slice(0, 1);
-            } else {
-                var known = {};
-
-                selectedFiles.forEach(function (file) {
-                    known[fileKey(file)] = true;
-                });
-
-                incoming.forEach(function (file) {
-                    var key = fileKey(file);
-                    if (!known[key]) {
-                        selectedFiles.push(file);
-                        known[key] = true;
-                    }
-                });
-
-                if (selectedFiles.length > allowed) {
-                    selectedFiles = selectedFiles.slice(0, allowed);
-                    window.alert('You can upload a maximum of ' + maxImages + ' images for this category.');
-                }
+                renderNewPreviews();
+                syncInputFiles(true);
+                onGalleryOrderChanged();
+                return;
             }
 
-            syncInputFiles();
+            var known = {};
+
+            selectedFiles.forEach(function (file) {
+                known[fileKey(file)] = true;
+            });
+
+            incoming.forEach(function (file) {
+                var key = fileKey(file);
+                if (!known[key]) {
+                    selectedFiles.push(file);
+                    known[key] = true;
+                }
+            });
+
+            if (selectedFiles.length > allowed) {
+                selectedFiles = selectedFiles.slice(0, allowed);
+                window.alert('You can upload a maximum of ' + maxImages + ' images for this category.');
+            }
+
+            applySelectedFiles();
         });
     }
+
+    formEl.addEventListener('submit', function () {
+        syncFilesFromGallery();
+        syncInputFiles(true);
+        syncImageOrderInputs();
+    });
 
     fillSubtypes();
     updateFields();

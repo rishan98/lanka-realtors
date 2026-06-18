@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Listing;
 use App\Support\ListingValidation;
+use App\Support\StoredFile;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -39,6 +40,7 @@ class ListingController extends Controller
             'districts' => City::districtsForForms(),
             'districtOptions' => City::districtsOptionsForJs(),
             'furnishingOptions' => config('listing.furnishing_options'),
+            'propertyStatusOptions' => config('listing.property_status_options'),
             'landSizeUnits' => config('listing.land_size_units'),
             'maxImages' => ListingValidation::maxImagesForKind(null),
             'maxImagesByKind' => config('listing.max_images_by_kind', []),
@@ -77,6 +79,7 @@ class ListingController extends Controller
             'districts' => City::districtsForForms($listing->city_id),
             'districtOptions' => City::districtsOptionsForJs($listing->city_id),
             'furnishingOptions' => config('listing.furnishing_options'),
+            'propertyStatusOptions' => config('listing.property_status_options'),
             'landSizeUnits' => config('listing.land_size_units'),
             'maxImages' => ListingValidation::maxImagesForKind(null),
             'maxImagesByKind' => config('listing.max_images_by_kind', []),
@@ -90,9 +93,11 @@ class ListingController extends Controller
         $this->authorizeListing($listing);
 
         $data = $request->validate(ListingValidation::rules($request, $listing));
-        $kind = $data['listing_kind'];
+        $kind = $listing->listing_kind;
 
         $payload = $this->buildPayload($data, $kind);
+        $payload['listing_kind'] = $listing->listing_kind;
+        $payload['property_subtype'] = $listing->property_subtype;
 
         if ($listing->title !== $payload['title']) {
             $payload['slug'] = Listing::uniqueSlug($payload['title']);
@@ -146,10 +151,8 @@ class ListingController extends Controller
             $payload['featured_image'] = null;
         }
 
-        if (($payload['property_subtype'] ?? null) === 'land') {
-            foreach (ListingValidation::landHiddenFields() as $field) {
-                $payload[$field] = null;
-            }
+        foreach (ListingValidation::hiddenFieldsFor($kind, $payload['property_subtype'] ?? null) as $field) {
+            $payload[$field] = null;
         }
 
         return $payload;
@@ -184,7 +187,7 @@ class ListingController extends Controller
     {
         if (! in_array('images', ListingValidation::allowedFields($kind), true)) {
             if (count($listing->allImagePaths()) > 0) {
-                Listing::deleteStoredFiles($listing->allImagePaths());
+                StoredFile::deleteMany($listing->allImagePaths());
 
                 return null;
             }
@@ -208,16 +211,22 @@ class ListingController extends Controller
             }
         }
 
-        $imagesChanged = ! empty($removed) || ! empty($newPaths);
+        $orderTokens = array_values(array_filter((array) $request->input('image_order', [])));
+        if (! empty($orderTokens)) {
+            $final = $this->buildOrderedImagePaths($orderTokens, $remaining, $newPaths);
+        } else {
+            $final = array_merge($remaining, $newPaths);
+        }
+
+        $imagesChanged = ! empty($removed) || ! empty($newPaths) || $final !== $remaining;
         if (! $imagesChanged) {
             return false;
         }
 
         $maxImages = ListingValidation::maxImagesForKind($kind);
-        $final = array_merge($remaining, $newPaths);
 
         if (count($final) > $maxImages) {
-            Listing::deleteStoredFiles($newPaths);
+            StoredFile::deleteMany($newPaths);
             throw ValidationException::withMessages([
                 'images' => 'You can have at most '.$maxImages.' image'.($maxImages === 1 ? '' : 's').' for this category.',
             ]);
@@ -225,13 +234,13 @@ class ListingController extends Controller
 
         $imagesRequired = in_array('images', config('listing.required_fields.'.$kind, []), true);
         if (empty($final) && $imagesRequired) {
-            Listing::deleteStoredFiles($newPaths);
+            StoredFile::deleteMany($newPaths);
             throw ValidationException::withMessages([
                 'images' => 'At least one image is required.',
             ]);
         }
 
-        Listing::deleteStoredFiles($removed);
+        StoredFile::deleteMany($removed);
 
         if (empty($final)) {
             return null;
@@ -243,7 +252,7 @@ class ListingController extends Controller
     protected function nullIrrelevantFields(string $kind): array
     {
         $all = [
-            'latitude', 'longitude', 'bedrooms', 'bathrooms', 'floors', 'furnishing_status',
+            'latitude', 'longitude', 'bedrooms', 'bathrooms', 'floors', 'property_status', 'furnishing_status',
             'parking_available', 'land_size', 'land_size_unit', 'built_area_sqft', 'price',
             'advance_payment_months', 'deposit_months', 'short_term_available', 'bills_included',
             'images', 'featured_image',
@@ -257,5 +266,40 @@ class ListingController extends Controller
         }
 
         return $nulls;
+    }
+
+    protected function buildOrderedImagePaths(array $tokens, array $remaining, array $newPaths): array
+    {
+        $final = [];
+        $remainingLookup = array_flip($remaining);
+
+        foreach ($tokens as $token) {
+            if (is_string($token) && strncmp($token, 'new:', 4) === 0) {
+                $index = (int) substr($token, 4);
+                if (isset($newPaths[$index])) {
+                    $final[] = $newPaths[$index];
+                }
+
+                continue;
+            }
+
+            if (is_string($token) && isset($remainingLookup[$token])) {
+                $final[] = $token;
+            }
+        }
+
+        foreach ($remaining as $path) {
+            if (! in_array($path, $final, true)) {
+                $final[] = $path;
+            }
+        }
+
+        foreach ($newPaths as $path) {
+            if (! in_array($path, $final, true)) {
+                $final[] = $path;
+            }
+        }
+
+        return array_values($final);
     }
 }

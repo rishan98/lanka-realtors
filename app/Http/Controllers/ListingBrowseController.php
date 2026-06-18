@@ -27,32 +27,18 @@ class ListingBrowseController extends Controller
             ));
         }
 
+        if ($request->input('subtype') === 'land' || $request->input('quick') === 'plot') {
+            return redirect()->route('lands.index', array_filter($request->only([
+                'q', 'city', 'kind', 'price_min', 'price_max', 'area_min', 'area_max', 'bhk',
+            ])));
+        }
+
         $query = Listing::published()
             ->fromAgents()
             ->with(['user', 'cityRelation']);
 
-        if ($request->filled('q')) {
-            $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $request->q).'%';
-            $query->where(function ($q) use ($term) {
-                $q->where('title', 'like', $term)
-                    ->orWhere('description', 'like', $term)
-                    ->orWhere('city', 'like', $term)
-                    ->orWhere('area', 'like', $term)
-                    ->orWhereHas('cityRelation', function ($cityQuery) use ($term) {
-                        $cityQuery->where('name', 'like', $term);
-                    });
-            });
-        }
-
-        if ($request->filled('city')) {
-            $resolvedCity = City::resolveFilter((string) $request->city);
-            if ($resolvedCity) {
-                $query->whereIn('city_id', $resolvedCity->filterCityIds());
-            } else {
-                $city = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $request->city).'%';
-                $query->where('city', 'like', $city);
-            }
-        }
+        $this->applyKeywordFilter($query, $request);
+        $this->applyCityFilter($query, $request);
 
         if ($request->filled('quick')) {
             $this->applyQuick($query, (string) $request->input('quick'));
@@ -89,6 +75,50 @@ class ListingBrowseController extends Controller
             'budget_presets' => config('portal.budget_presets_lkr', []),
             'sqft_presets' => config('portal.sqft_presets', []),
             'seo' => Seo::listingIndex($filters, $kinds),
+            'browseContext' => null,
+            'formAction' => route('listings.index'),
+        ]);
+    }
+
+    public function lands(Request $request)
+    {
+        $query = Listing::published()
+            ->fromAgents()
+            ->with(['user', 'cityRelation'])
+            ->where('property_subtype', 'land')
+            ->whereIn('listing_kind', ['sale', 'rental']);
+
+        $this->applyKeywordFilter($query, $request);
+        $this->applyCityFilter($query, $request);
+
+        if ($request->filled('kind') && in_array($request->kind, ['sale', 'rental'], true)) {
+            $query->where('listing_kind', $request->kind);
+        }
+
+        $this->applyAdvancedFilters($query, $request);
+
+        $listings = $query->latest()->paginate(12)->withQueryString();
+
+        $filters = array_merge(
+            $request->only(['q', 'city', 'kind', 'price_min', 'price_max', 'area_min', 'area_max', 'bhk']),
+            ['subtype' => 'land']
+        );
+        $kinds = config('listing.kinds');
+        $districts = City::districtsForForms();
+        $activeKind = $filters['kind'] ?? null;
+
+        return view('listings.index', [
+            'listings' => $listings,
+            'kinds' => $kinds,
+            'districts' => $districts,
+            'filters' => $filters,
+            'activeKind' => $activeKind,
+            'categoryCarousel' => HeroCarouselBanner::slidesForBannerContext('lands'),
+            'budget_presets' => config('portal.budget_presets_lkr', []),
+            'sqft_presets' => config('portal.sqft_presets', []),
+            'seo' => Seo::landsIndex($filters),
+            'browseContext' => 'lands',
+            'formAction' => route('lands.index'),
         ]);
     }
 
@@ -118,6 +148,39 @@ class ListingBrowseController extends Controller
             'similarListings' => $similarListings,
             'seo' => Seo::listingShow($listing),
         ]);
+    }
+
+    protected function applyKeywordFilter($query, Request $request): void
+    {
+        if (! $request->filled('q')) {
+            return;
+        }
+
+        $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $request->q).'%';
+        $query->where(function ($q) use ($term) {
+            $q->where('title', 'like', $term)
+                ->orWhere('description', 'like', $term)
+                ->orWhere('city', 'like', $term)
+                ->orWhere('area', 'like', $term)
+                ->orWhereHas('cityRelation', function ($cityQuery) use ($term) {
+                    $cityQuery->where('name', 'like', $term);
+                });
+        });
+    }
+
+    protected function applyCityFilter($query, Request $request): void
+    {
+        if (! $request->filled('city')) {
+            return;
+        }
+
+        $resolvedCity = City::resolveFilter((string) $request->city);
+        if ($resolvedCity) {
+            $query->whereIn('city_id', $resolvedCity->filterCityIds());
+        } else {
+            $city = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $request->city).'%';
+            $query->where('city', 'like', $city);
+        }
     }
 
     protected function applyAdvancedFilters($query, Request $request): void

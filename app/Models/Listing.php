@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\StoredFile;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +22,7 @@ class Listing extends Model
         'currency',
         'listing_kind',
         'property_subtype',
+        'property_status',
         'city_id',
         'city',
         'area',
@@ -218,6 +220,15 @@ class Listing extends Model
         return config('listing.furnishing_options.'.$this->furnishing_status, ucfirst(str_replace('_', ' ', $this->furnishing_status)));
     }
 
+    public function propertyStatusLabel(): ?string
+    {
+        if (! $this->property_status) {
+            return null;
+        }
+
+        return config('listing.property_status_options.'.$this->property_status, ucfirst(str_replace('_', ' ', $this->property_status)));
+    }
+
     public function landSizeLabel(): ?string
     {
         if (! $this->land_size) {
@@ -245,46 +256,14 @@ class Listing extends Model
         }
 
         return array_values(array_unique(array_filter(array_map(
-            fn ($path) => self::normalizeStoragePath(is_string($path) ? $path : null),
+            fn ($path) => StoredFile::normalizePath(is_string($path) ? $path : null),
             $paths
         ))));
     }
 
     public function deleteStoredImages(): void
     {
-        self::deleteStoredFiles($this->allImagePaths());
-    }
-
-    public static function deleteStoredFiles(array $paths): void
-    {
-        foreach (array_unique(array_filter($paths)) as $path) {
-            $normalized = self::normalizeStoragePath($path);
-
-            if ($normalized) {
-                Storage::disk('public')->delete($normalized);
-            }
-        }
-    }
-
-    public static function normalizeStoragePath(?string $path): ?string
-    {
-        if (! is_string($path) || trim($path) === '') {
-            return null;
-        }
-
-        $path = str_replace('\\', '/', trim($path));
-
-        if (str_contains($path, '://')) {
-            $path = parse_url($path, PHP_URL_PATH) ?? '';
-        }
-
-        $path = ltrim($path, '/');
-
-        if (str_starts_with($path, 'storage/')) {
-            $path = substr($path, strlen('storage/'));
-        }
-
-        return $path !== '' ? $path : null;
+        StoredFile::deleteMany($this->allImagePaths());
     }
 
     public function resolvedImagePaths(): array
@@ -353,11 +332,15 @@ class Listing extends Model
 
     public function cardStatusLabel(): ?string
     {
+        if ($status = $this->propertyStatusLabel()) {
+            return $status;
+        }
+
         if ($furnishing = $this->furnishingLabel()) {
             return $furnishing;
         }
 
-        return $this->kindLabel();
+        return null;
     }
 
     public function cardMetaLabel(): string
@@ -592,16 +575,16 @@ class Listing extends Model
             $items[] = ['label' => 'Furnishing', 'value' => $this->furnishingLabel()];
         }
 
+        if ($this->propertyStatusLabel()) {
+            $items[] = ['label' => 'Property Status', 'value' => $this->propertyStatusLabel()];
+        }
+
         if ($this->parking_available !== null) {
             $items[] = ['label' => 'Parking', 'value' => $this->parking_available ? 'Available' : 'Not available'];
         }
 
         $items[] = ['label' => 'Listing Type', 'value' => $this->kindLabel()];
         $items[] = ['label' => 'Property Type', 'value' => $this->subtypeLabel()];
-
-        if ($this->listing_kind !== 'wanted' && ($status = $this->cardStatusLabel())) {
-            $items[] = ['label' => 'Status', 'value' => $status];
-        }
 
         return $items;
     }

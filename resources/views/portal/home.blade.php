@@ -56,7 +56,7 @@
             <span class="hero-search__popular-label">Popular</span>
             <a class="pill" href="{{ route('listings.index', ['quick' => 'apartments', 'city' => 'Colombo']) }}">Colombo apartments</a>
             <a class="pill" href="{{ route('listings.index', ['kind' => 'rental', 'subtype' => 'apartment', 'city' => 'Kandy']) }}">Kandy rent</a>
-            <a class="pill" href="{{ route('listings.index', ['quick' => 'plot', 'city' => 'Galle']) }}">Galle land</a>
+            <a class="pill" href="{{ route('lands.index', ['city' => 'Galle']) }}">Galle land</a>
             <a class="pill" href="{{ route('listings.index', ['quick' => 'commercial', 'q' => 'office']) }}">Office space</a>
         </div>
     </div>

@@ -27,6 +27,24 @@ return [
         ],
     ],
 
+    'page_banners' => [
+        'lands' => [
+            'nav_label' => 'Lands',
+            'preview_route' => 'lands.index',
+            'preview_params' => [],
+        ],
+        'find-realtor' => [
+            'nav_label' => 'Find realtor',
+            'preview_route' => 'find-realtor',
+            'preview_params' => [],
+        ],
+        'owners' => [
+            'nav_label' => 'Owners',
+            'preview_route' => 'owners',
+            'preview_params' => [],
+        ],
+    ],
+
     'about' => [
         'eyebrow' => 'About Lanka Realtors Web LK',
         'title' => 'Sri Lanka\'s dedicated property advertising portal for real estate professionals',
@@ -157,10 +175,9 @@ return [
         [
             'title' => 'Land & plots',
             'links' => [
-                ['label' => 'Land for sale — Colombo', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'land', 'city' => 'Colombo']],
-                ['label' => 'Land for rent', 'route' => 'listings.index', 'params' => ['kind' => 'rental', 'subtype' => 'land']],
-                ['label' => 'Commercial land', 'route' => 'listings.index', 'params' => ['subtype' => 'land']],
-                ['label' => 'All land listings', 'route' => 'listings.index', 'params' => ['subtype' => 'land']],
+                ['label' => 'Land for sale — Colombo', 'route' => 'lands.index', 'params' => ['kind' => 'sale', 'city' => 'Colombo']],
+                ['label' => 'Land for rent', 'route' => 'lands.index', 'params' => ['kind' => 'rental']],
+                ['label' => 'All land listings', 'route' => 'lands.index'],
             ],
         ],
         [

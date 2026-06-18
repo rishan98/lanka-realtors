@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\StoredFile;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -52,6 +53,25 @@ class User extends Authenticatable
         'is_preferred' => 'boolean',
         'rating' => 'float',
     ];
+
+    protected static function booted(): void
+    {
+        static::updating(function (User $user) {
+            StoredFile::deleteMany(StoredFile::originalPathsForDirtyFields($user, [
+                'avatar_path',
+                'cover_path',
+                'company_logo_path',
+            ]));
+        });
+
+        static::deleting(function (User $user) {
+            StoredFile::purgeModelFiles($user, [
+                'avatar_path',
+                'cover_path',
+                'company_logo_path',
+            ]);
+        });
+    }
 
     public function listings()
     {

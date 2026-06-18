@@ -104,8 +104,8 @@ class ListingSeeder extends Seeder
             $this->rental('nipun.perera@seed.test', 'annexe', 'Ground-floor annexe with separate entrance', 65000, 2, 1, 650, false, false),
 
             // —— Invest ——
-            $this->residential('ravi.silva@seed.test', 'projects', 'land', 'Coastal land parcel — tourism potential', 22000000, null, null, null, '8', 'perches'),
-            $this->residential('dilan.rathnayake@seed.test', 'projects', 'commercial', 'Mixed-use building — strong rental yield', 180000000, null, null, 8500),
+            $this->residential('ravi.silva@seed.test', 'projects', 'house', 'Coastal villa project — tourism potential', 22000000, 4, 3, 2400),
+            $this->residential('dilan.rathnayake@seed.test', 'projects', 'apartment', 'Mixed-use apartment block — strong rental yield', 180000000, 3, 2, 8500),
             $this->residential('anuki.jayawardena@seed.test', 'projects', 'apartment', 'Boutique apartment block — pre-launch units', 14500000, 2, 2, 980),
 
             // —— Wanted ——
@@ -152,6 +152,7 @@ class ListingSeeder extends Seeder
             'built_area_sqft' => $isLand ? null : $sqft,
             'floors' => $isLand ? null : ($sqft && $sqft > 2000 ? 2 : 1),
             'furnishing_status' => $isLand ? null : ($kind === 'rental' ? 'furnished' : 'semi_furnished'),
+            'property_status' => $kind === 'projects' ? 'under_construction' : 'available_now',
             'parking_available' => $isLand ? null : true,
             'land_size' => $isLand ? $landSize : ($landSize ?: null),
             'land_size_unit' => $isLand ? $landUnit : null,

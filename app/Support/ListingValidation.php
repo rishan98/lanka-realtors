@@ -10,17 +10,22 @@ class ListingValidation
 {
     public static function rules(Request $request, ?Listing $listing = null): array
     {
-        $kind = $request->input('listing_kind');
-        $subtype = $request->input('property_subtype');
-        $isLand = $subtype === 'land';
+        $kind = $listing ? $listing->listing_kind : $request->input('listing_kind');
+        $subtype = $listing ? $listing->property_subtype : $request->input('property_subtype');
+        $hiddenFields = self::hiddenFieldsFor($kind, $subtype);
+        $fieldHidden = fn (string $name): bool => in_array($name, $hiddenFields, true);
         $subtypes = array_keys(config('listing.kinds.'.$kind.'.subtypes', []));
         $kindFields = config('listing.kind_fields.'.$kind, []);
         $requiredFields = config('listing.required_fields.'.$kind, []);
         $maxImages = self::maxImagesForKind($kind);
 
         $rules = [
-            'listing_kind' => ['required', 'string', Rule::in(array_keys(config('listing.kinds', [])))],
-            'property_subtype' => ['required', 'string', Rule::in($subtypes)],
+            'listing_kind' => $listing
+                ? ['required', 'string', Rule::in([$listing->listing_kind])]
+                : ['required', 'string', Rule::in(array_keys(config('listing.kinds', [])))],
+            'property_subtype' => $listing
+                ? ['required', 'string', Rule::in([$listing->property_subtype])]
+                : ['required', 'string', Rule::in($subtypes)],
             'status' => ['required', Rule::in(['draft', 'published'])],
             'currency' => 'nullable|string|max:8',
         ];
@@ -57,22 +62,22 @@ class ListingValidation
             $rules['longitude'] = 'nullable|numeric|between:-180,180';
         }
 
-        if (in_array('bedrooms', $kindFields, true)) {
-            $rules['bedrooms'] = (! $isLand && in_array('bedrooms', $requiredFields, true))
+        if (in_array('bedrooms', $kindFields, true) && ! $fieldHidden('bedrooms')) {
+            $rules['bedrooms'] = in_array('bedrooms', $requiredFields, true)
                 ? 'required|integer|min:0|max:50'
                 : 'nullable|integer|min:0|max:50';
         }
 
-        if (in_array('bathrooms', $kindFields, true) && ! $isLand) {
+        if (in_array('bathrooms', $kindFields, true) && ! $fieldHidden('bathrooms')) {
             $rules['bathrooms'] = 'nullable|integer|min:0|max:50';
         }
 
-        if (in_array('land_size', $kindFields, true)) {
+        if (in_array('land_size', $kindFields, true) && ! $fieldHidden('land_size')) {
             $rules['land_size'] = 'nullable|string|max:120';
             $rules['land_size_unit'] = ['nullable', 'string', Rule::in(array_keys(config('listing.land_size_units', [])))];
         }
 
-        if (in_array('built_area_sqft', $kindFields, true) && ! $isLand) {
+        if (in_array('built_area_sqft', $kindFields, true) && ! $fieldHidden('built_area_sqft')) {
             $rules['built_area_sqft'] = 'nullable|integer|min:0|max:10000000';
         }
 
@@ -80,15 +85,21 @@ class ListingValidation
             $rules['price'] = 'nullable|numeric|min:0';
         }
 
-        if (in_array('floors', $kindFields, true) && ! $isLand) {
+        if (in_array('floors', $kindFields, true) && ! $fieldHidden('floors')) {
             $rules['floors'] = 'nullable|integer|min:0|max:200';
         }
 
-        if (in_array('furnishing_status', $kindFields, true) && ! $isLand) {
+        if (in_array('property_status', $kindFields, true)) {
+            $rules['property_status'] = in_array('property_status', $requiredFields, true)
+                ? ['required', 'string', Rule::in(array_keys(config('listing.property_status_options', [])))]
+                : ['nullable', 'string', Rule::in(array_keys(config('listing.property_status_options', [])))];
+        }
+
+        if (in_array('furnishing_status', $kindFields, true) && ! $fieldHidden('furnishing_status')) {
             $rules['furnishing_status'] = ['nullable', 'string', Rule::in(array_keys(config('listing.furnishing_options', [])))];
         }
 
-        if (in_array('parking_available', $kindFields, true) && ! $isLand) {
+        if (in_array('parking_available', $kindFields, true) && ! $fieldHidden('parking_available')) {
             $rules['parking_available'] = 'nullable|boolean';
         }
 
@@ -131,6 +142,8 @@ class ListingValidation
             if ($listing) {
                 $rules['removed_images'] = 'nullable|array';
                 $rules['removed_images.*'] = ['string', Rule::in($listing->resolvedImagePaths())];
+                $rules['image_order'] = 'nullable|array';
+                $rules['image_order.*'] = 'string|max:255';
             }
         }
 
@@ -152,6 +165,24 @@ class ListingValidation
     public static function landHiddenFields(): array
     {
         return config('listing.land_hidden_fields', []);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function hiddenFieldsFor(?string $kind, ?string $subtype): array
+    {
+        $hidden = [];
+
+        if ($subtype === 'land') {
+            $hidden = array_merge($hidden, self::landHiddenFields());
+        }
+
+        if ($subtype === 'apartment' || $kind === 'projects') {
+            $hidden = array_merge($hidden, config('listing.compact_property_hidden_fields', []));
+        }
+
+        return array_values(array_unique($hidden));
     }
 
     public static function allowedFields(string $kind): array

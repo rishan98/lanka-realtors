@@ -40,6 +40,7 @@ class ListingFactory extends Factory
             'built_area_sqft' => $isLand ? null : $this->faker->numberBetween(600, 4500),
             'floors' => $isLand ? null : $this->faker->numberBetween(1, 3),
             'furnishing_status' => $isLand ? null : $this->faker->randomElement(['furnished', 'semi_furnished', 'unfurnished']),
+            'property_status' => $this->faker->randomElement(array_keys(config('listing.property_status_options', []))),
             'parking_available' => $isLand ? null : $this->faker->boolean(70),
             'land_size' => $isLand ? (string) $this->faker->numberBetween(5, 50) : null,
             'land_size_unit' => $isLand ? $this->faker->randomElement(['perches', 'acres']) : null,

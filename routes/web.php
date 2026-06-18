@@ -28,6 +28,7 @@ Route::get('/', [PortalController::class, 'index'])->name('portal.home');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
 Route::get('/listings', [ListingBrowseController::class, 'index'])->name('listings.index');
+Route::get('/lands', [ListingBrowseController::class, 'lands'])->name('lands.index');
 Route::get('/listings/{listing}', [ListingBrowseController::class, 'show'])->name('listings.show');
 Route::post('/listings/{listing}/contact-leads', [ListingContactLeadController::class, 'store'])
     ->middleware('throttle:30,1')

@@ -13,6 +13,7 @@ class SitemapController extends Controller
         $staticUrls = [
             ['loc' => route('portal.home'), 'priority' => '1.0'],
             ['loc' => route('listings.index'), 'priority' => '0.9'],
+            ['loc' => route('lands.index'), 'priority' => '0.85'],
             ['loc' => route('find-realtor'), 'priority' => '0.8'],
             ['loc' => route('projects'), 'priority' => '0.7'],
             ['loc' => route('locate'), 'priority' => '0.7'],

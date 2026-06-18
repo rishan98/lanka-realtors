@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Agent;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
@@ -71,24 +70,15 @@ class ProfileController extends Controller
         }
 
         if ($request->hasFile('avatar')) {
-            if ($user->avatar_path) {
-                Storage::disk('public')->delete($user->avatar_path);
-            }
             $folder = $isOwner ? 'owners/avatars' : 'agents/avatars';
             $user->avatar_path = $request->file('avatar')->store($folder, 'public');
         }
 
         if (! $isOwner && $request->hasFile('cover')) {
-            if ($user->cover_path) {
-                Storage::disk('public')->delete($user->cover_path);
-            }
             $user->cover_path = $request->file('cover')->store('agents/covers', 'public');
         }
 
         if (! $isOwner && $request->hasFile('company_logo')) {
-            if ($user->company_logo_path) {
-                Storage::disk('public')->delete($user->company_logo_path);
-            }
             $user->company_logo_path = $request->file('company_logo')->store('agents/logos', 'public');
         }
 

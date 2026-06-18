@@ -81,6 +81,36 @@ class Seo
     }
 
     /**
+     * @param  array<string, mixed>  $filters
+     * @return array{title: string, description: string, canonical: string}
+     */
+    public static function landsIndex(array $filters): array
+    {
+        $siteName = config('app.name');
+        $labelParts = ['Land'];
+
+        if (! empty($filters['kind']) && in_array($filters['kind'], ['sale', 'rental'], true)) {
+            $labelParts[] = $filters['kind'] === 'sale' ? 'for sale' : 'for rent';
+        }
+
+        if (! empty($filters['city'])) {
+            $labelParts[] = 'in '.$filters['city'];
+        }
+
+        if (! empty($filters['q'])) {
+            $labelParts[] = 'matching "'.Str::limit($filters['q'], 40).'"';
+        }
+
+        $heading = implode(' ', $labelParts);
+
+        return [
+            'title' => $heading.' — '.$siteName,
+            'description' => 'Browse land listings for sale and rent across Sri Lanka on '.$siteName.'. Filter by location and price.',
+            'canonical' => route('lands.index', array_filter($filters)),
+        ];
+    }
+
+    /**
      * @return array{title: string, description: string, canonical: string, image: string}
      */
     public static function listingShow(Listing $listing): array
