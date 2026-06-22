@@ -23,7 +23,9 @@ class SitemapController extends Controller
         ];
 
         $listings = Listing::published()
-            ->select(['id', 'updated_at'])
+            ->whereNotNull('slug')
+            ->where('slug', '!=', '')
+            ->select(['id', 'slug', 'updated_at'])
             ->latest('updated_at')
             ->get();
 

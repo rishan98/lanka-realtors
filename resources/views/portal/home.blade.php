@@ -1,7 +1,7 @@
 @extends('layouts.portal')
 
-@section('title', 'Buy, Rent & Sell Property in Sri Lanka — '.config('app.name'))
-@section('meta_description', config('portal.seo.default_description'))
+@section('title', 'Search Properties with Realtor Expertise — '.config('app.name'))
+@section('meta_description', 'Search properties across Sri Lanka with verified realtor expertise. Buy, rent, and sell homes, apartments, land, and projects on '.config('app.name').'.')
 @section('canonical', route('portal.home'))
 
 @section('content')
@@ -11,11 +11,8 @@
 
     <div class="container hero-search__layout">
         <div class="hero-search__intro">
-            <!-- <p class="hero-search__eyebrow">
-                <span class="hero-search__eyebrow-dot"></span>
-                {{ $portal['tagline'] ?? 'Find your next address.' }}
-            </p> -->
             <h1 class="hero-search__title">Search Properties with <span class="hero-search__title-accent">Realtor Expertise</span></h1>
+            <!-- <p class="hero-search__lead">Browse verified agents, map-first discovery, and curated listings for buying, renting, and selling property across Sri Lanka — backed by local realtor expertise.</p> -->
         </div>
 
         <div class="hero-search__agents-wrap">
@@ -54,10 +51,10 @@
 
         <div class="mb-hot-links hero-search__popular">
             <span class="hero-search__popular-label">Popular</span>
-            <a class="pill" href="{{ route('listings.index', ['quick' => 'apartments', 'city' => 'Colombo']) }}">Colombo apartments</a>
-            <a class="pill" href="{{ route('listings.index', ['kind' => 'rental', 'subtype' => 'apartment', 'city' => 'Kandy']) }}">Kandy rent</a>
-            <a class="pill" href="{{ route('lands.index', ['city' => 'Galle']) }}">Galle land</a>
-            <a class="pill" href="{{ route('listings.index', ['quick' => 'commercial', 'q' => 'office']) }}">Office space</a>
+            <a class="pill" href="{{ \App\Support\ListingBrowseUrl::forListings(['kind' => 'sale', 'subtype' => 'apartment', 'city' => 'Colombo']) }}">Colombo apartments</a>
+            <a class="pill" href="{{ \App\Support\ListingBrowseUrl::forListings(['kind' => 'rental', 'subtype' => 'apartment', 'city' => 'Kandy']) }}">Kandy rent</a>
+            <a class="pill" href="{{ \App\Support\ListingBrowseUrl::forLands(['city' => 'Galle']) }}">Galle land</a>
+            <a class="pill" href="{{ \App\Support\ListingBrowseUrl::forListings(['kind' => 'sale', 'subtype' => 'commercial']) }}">Office space</a>
         </div>
     </div>
 </section>
@@ -66,7 +63,7 @@
     <div class="container">
         <header class="section-top-viewed__header" style="border-bottom:none; margin-bottom: 24px;">
             <h2 class="section-top-viewed__title">Top Agents</h2>
-            <a href="{{ route('find-realtor') }}" class="section-top-viewed__link">See all Agents &rarr;</a>
+            <a href="{{ route('find-realtor') }}" class="section-top-viewed__link">Browse all verified agents</a>
         </header>
 
         @if($topAgents->isEmpty())
@@ -115,7 +112,7 @@
     <div class="container">
         <header class="section-top-viewed__header">
             <h2 class="section-top-viewed__title">Popular Owner Properties</h2>
-            <a href="{{ route('listings.index') }}" class="section-top-viewed__link">See all Properties &rarr;</a>
+            <a href="{{ route('listings.index') }}" class="section-top-viewed__link">Browse all property listings</a>
         </header>
 
         @if($featured->isEmpty())
@@ -145,19 +142,18 @@
 
         <div class="section-advice__grid">
             @foreach($portal['advice_cards'] ?? [] as $card)
-                @php($href = $card['href'] ?? (isset($card['route']) ? route($card['route'], $card['params'] ?? []) : '#'))
-                <a href="{{ $href }}" class="advice-card advice-card--{{ $loop->iteration }}">
+                @php($href = ! empty($card['route']) ? route($card['route'], $card['params'] ?? []) : ($card['href'] ?? route('portal.home')))
+                <article class="advice-card advice-card--{{ $loop->iteration }}">
                     <span class="advice-card__shine" aria-hidden="true"></span>
                     <div class="advice-card__head">
                         <div class="advice-card__icon">
                             <x-advice-card-icon :index="$loop->index" />
                         </div>
-                        <span class="advice-card__arrow" aria-hidden="true">→</span>
                     </div>
                     <h3 class="advice-card__title">{{ $card['title'] }}</h3>
                     <p class="advice-card__text">{{ $card['text'] }}</p>
-                    <span class="advice-card__link-label">Explore</span>
-                </a>
+                    <a href="{{ $href }}" class="advice-card__link">{{ $card['link_label'] ?? ('Browse '.$card['title']) }}</a>
+                </article>
             @endforeach
         </div>
     </div>
@@ -167,12 +163,12 @@
     <div class="container">
         <header class="section-top-viewed__header" style="border-bottom:none; margin-bottom: 24px;">
             <h2 class="section-top-viewed__title">Top Project Listings</h2>
-            <a href="{{ route('listings.index', ['kind' => 'projects']) }}" class="section-top-viewed__link">See all projects &rarr;</a>
+            <a href="{{ route('listings.browse-kind', ['kind' => 'projects']) }}" class="section-top-viewed__link">Browse all project listings</a>
         </header>
 
         @if($projectListings->isEmpty())
             <div class="block-gray mt-4">
-                <p class="muted mb-0">No project listings yet. <a href="{{ route('listings.index', ['kind' => 'projects']) }}">Browse projects</a> or post a new listing.</p>
+                <p class="muted mb-0">No project listings yet. <a href="{{ route('listings.browse-kind', ['kind' => 'projects']) }}">Browse projects</a> or post a new listing.</p>
             </div>
         @else
             <div class="mb-corridor-slider">

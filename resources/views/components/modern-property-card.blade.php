@@ -35,5 +35,6 @@
         @if($status = $listing->cardStatusLabel())
             <div class="modern-property-card__status">{{ $status }}</div>
         @endif
+        <span class="modern-property-card__cta">View {{ $listing->title }} listing</span>
     </div>
 </a>

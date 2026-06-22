@@ -3,10 +3,12 @@
 use App\Http\Controllers\AgentContactLeadController;
 use App\Http\Controllers\AgentReviewController;
 use App\Http\Controllers\Admin\AgentController;
+use App\Http\Controllers\Admin\AgentReviewController as AdminAgentReviewController;
 use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\ContactInquiryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\HeroCarouselController;
+use App\Http\Controllers\Admin\ListingController as AdminListingController;
 use App\Http\Controllers\Admin\ListingBannerController;
 use App\Http\Controllers\Admin\UserApprovalController;
 use App\Http\Controllers\Agent\DashboardController;
@@ -20,14 +22,38 @@ use App\Http\Controllers\ListingContactLeadController;
 use App\Http\Controllers\LocateController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\SitePageController;
+use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PortalController::class, 'index'])->name('portal.home');
+Route::get('/robots.txt', RobotsController::class)->name('robots');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
+Route::get('/listings/{kind}/{subtype}/{citySlug}', [ListingBrowseController::class, 'index'])
+    ->where('kind', 'sale|rental|projects|wanted')
+    ->where('subtype', 'house|apartment|land|commercial|bungalow|villa|rooms|annexe')
+    ->name('listings.browse');
+Route::get('/listings/{kind}/{subtype}', [ListingBrowseController::class, 'index'])
+    ->where('kind', 'sale|rental|projects|wanted')
+    ->where('subtype', 'house|apartment|land|commercial|bungalow|villa|rooms|annexe')
+    ->name('listings.browse-kind-subtype');
+Route::get('/listings/{kind}', [ListingBrowseController::class, 'index'])
+    ->where('kind', 'sale|rental|projects|wanted')
+    ->name('listings.browse-kind');
+
 Route::get('/listings', [ListingBrowseController::class, 'index'])->name('listings.index');
+
+Route::get('/lands/{kind}/{citySlug}', [ListingBrowseController::class, 'lands'])
+    ->where('kind', 'sale|rental')
+    ->name('lands.browse-kind-city');
+Route::get('/lands/{kind}', [ListingBrowseController::class, 'lands'])
+    ->where('kind', 'sale|rental')
+    ->name('lands.browse-kind');
+Route::get('/lands/in/{citySlug}', [ListingBrowseController::class, 'lands'])
+    ->name('lands.browse-city');
+
 Route::get('/lands', [ListingBrowseController::class, 'lands'])->name('lands.index');
 Route::get('/listings/{listing}', [ListingBrowseController::class, 'show'])->name('listings.show');
 Route::post('/listings/{listing}/contact-leads', [ListingContactLeadController::class, 'store'])
@@ -44,8 +70,12 @@ Route::post('/agents/{agent}/reviews', [AgentReviewController::class, 'store'])
     ->name('agents.reviews.store');
 
 Route::get('/projects', [SitePageController::class, 'projects'])->name('projects');
-Route::redirect('/invest-now', '/listings?kind=projects');
-Route::get('/wanted', [SitePageController::class, 'wanted'])->name('wanted');
+Route::redirect('/invest-now', '/listings/projects');
+Route::get('/wanted', function (\Illuminate\Http\Request $request) {
+    $request->merge(['kind' => 'wanted']);
+
+    return app(ListingBrowseController::class)->index($request);
+})->name('wanted');
 Route::get('/find-realtor', [SitePageController::class, 'findRealtor'])->name('find-realtor');
 Route::get('/owners', [SitePageController::class, 'owners'])->name('owners');
 Route::redirect('/grab-me', '/owners');
@@ -73,6 +103,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('users/{user}/reject', [UserApprovalController::class, 'reject'])->name('users.reject');
     Route::get('agents', [AgentController::class, 'index'])->name('agents.index');
     Route::patch('agents/{user}/rating', [AgentController::class, 'updateRating'])->name('agents.rating');
+    Route::post('agents/{user}/avatar', [AgentController::class, 'updateAvatar'])->name('agents.avatar');
     Route::resource('cities', CityController::class)->except(['show']);
     Route::get('hero-carousel', [HeroCarouselController::class, 'edit'])->name('hero-carousel.edit');
     Route::put('hero-carousel', [HeroCarouselController::class, 'update'])->name('hero-carousel.update');
@@ -81,13 +112,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('listing-banners/{kind}', [ListingBannerController::class, 'update'])->name('listing-banners.update');
     Route::get('contact-inquiries', [ContactInquiryController::class, 'index'])->name('contact-inquiries.index');
     Route::get('contact-inquiries/{contactInquiry}', [ContactInquiryController::class, 'show'])->name('contact-inquiries.show');
+    Route::get('reviews', [AdminAgentReviewController::class, 'index'])->name('reviews.index');
+    Route::post('reviews/{review}/approve', [AdminAgentReviewController::class, 'approve'])->name('reviews.approve');
+    Route::post('reviews/{review}/reject', [AdminAgentReviewController::class, 'reject'])->name('reviews.reject');
+    Route::get('listings', [AdminListingController::class, 'index'])->name('listings.index');
+    Route::post('listings/{listing}/activate', [AdminListingController::class, 'activate'])->name('listings.activate');
+    Route::post('listings/{listing}/deactivate', [AdminListingController::class, 'deactivate'])->name('listings.deactivate');
 });
 
 Route::middleware(['auth', 'portal', 'role:agent', 'approved'])->prefix('agent')->name('agent.')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('reviews', [AgentReviewModerationController::class, 'index'])->name('reviews.index');
-    Route::post('reviews/{review}/approve', [AgentReviewModerationController::class, 'approve'])->name('reviews.approve');
-    Route::post('reviews/{review}/reject', [AgentReviewModerationController::class, 'reject'])->name('reviews.reject');
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::resource('listings', ListingController::class)->except(['show']);

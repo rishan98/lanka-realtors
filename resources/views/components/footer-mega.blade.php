@@ -7,10 +7,12 @@
                 <ul class="footer-mega__list">
                     @foreach($col['links'] ?? [] as $link)
                         <li>
-                            @if(!empty($link['route']))
-                                <a href="{{ route($link['route'], $link['params'] ?? []) }}">{{ $link['label'] }}</a>
+                            @if(! empty($link['route']))
+                                <a href="{{ \App\Support\ListingBrowseUrl::fromFooterLink($link) }}">{{ $link['label'] }}</a>
+                            @elseif(! empty($link['href']) && $link['href'] !== '#')
+                                <a href="{{ $link['href'] }}">{{ $link['label'] }}</a>
                             @else
-                                <a href="{{ $link['href'] ?? '#' }}">{{ $link['label'] }}</a>
+                                <span>{{ $link['label'] }}</span>
                             @endif
                         </li>
                     @endforeach

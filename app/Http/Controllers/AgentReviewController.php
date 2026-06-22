@@ -37,7 +37,7 @@ class AgentReviewController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Thank you for your review. It will appear on this portfolio after the agent approves it.',
+            'message' => 'Thank you for your review. It will appear on this portfolio after an administrator approves it.',
             'pending' => true,
         ], 201);
     }

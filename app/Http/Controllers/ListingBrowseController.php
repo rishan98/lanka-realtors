@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\City;
 use App\Models\HeroCarouselBanner;
 use App\Models\Listing;
+use App\Support\ListingBrowseUrl;
 use App\Support\ListingRules;
 use App\Support\Seo;
 use Illuminate\Http\Request;
@@ -13,6 +14,8 @@ class ListingBrowseController extends Controller
 {
     public function index(Request $request)
     {
+        $this->mergeBrowseRouteDefaults($request);
+
         if ($request->input('kind') === 'invest') {
             return redirect()->route('listings.index', array_merge(
                 $request->except('kind'),
@@ -82,6 +85,8 @@ class ListingBrowseController extends Controller
 
     public function lands(Request $request)
     {
+        $this->mergeBrowseRouteDefaults($request);
+
         $query = Listing::published()
             ->fromAgents()
             ->with(['user', 'cityRelation'])
@@ -148,6 +153,27 @@ class ListingBrowseController extends Controller
             'similarListings' => $similarListings,
             'seo' => Seo::listingShow($listing),
         ]);
+    }
+
+    protected function mergeBrowseRouteDefaults(Request $request): void
+    {
+        $route = $request->route();
+        if ($route === null) {
+            return;
+        }
+
+        foreach (['kind', 'subtype'] as $param) {
+            $value = $route->parameter($param);
+            if (is_string($value) && $value !== '' && ! $request->filled($param)) {
+                $request->merge([$param => $value]);
+            }
+        }
+
+        $citySlug = $route->parameter('citySlug');
+        if (is_string($citySlug) && $citySlug !== '' && ! $request->filled('city')) {
+            $resolvedCity = City::resolveFilter($citySlug);
+            $request->merge(['city' => $resolvedCity?->name ?? $citySlug]);
+        }
     }
 
     protected function applyKeywordFilter($query, Request $request): void

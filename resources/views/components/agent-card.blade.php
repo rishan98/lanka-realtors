@@ -5,7 +5,7 @@
 @if($static)
 <div class="mb-agent-card mb-agent-card--static">
 @else
-<a href="{{ $href }}" class="mb-agent-card" aria-label="View {{ $agent->name }} portfolio">
+<a href="{{ $href }}" class="mb-agent-card">
 @endif
     <div class="mb-agent-card__header">
         <img class="mb-agent-card__photo" src="{{ $agent->avatarUrl() }}" alt="{{ $agent->name }}">
@@ -24,9 +24,9 @@
     </div>
     <div class="mb-agent-card__body">
         @if($agent->companyLogoUrl())
-            <img src="{{ $agent->companyLogoUrl() }}" class="mb-agent-card__company-logo" alt="">
+            <img src="{{ $agent->companyLogoUrl() }}" class="mb-agent-card__company-logo" alt="{{ $agent->companyDisplayName() }} logo">
         @else
-            <img src="https://ui-avatars.com/api/?name={{ urlencode($agent->companyDisplayName()) }}&background=f5f5f5&color=424242" class="mb-agent-card__company-logo" alt="">
+            <img src="https://ui-avatars.com/api/?name={{ urlencode($agent->companyDisplayName()) }}&background=f5f5f5&color=424242" class="mb-agent-card__company-logo" alt="{{ $agent->companyDisplayName() }} logo">
         @endif
         <div class="mb-agent-card__company-info">
             <div class="mb-agent-card__company-name">{{ $agent->companyDisplayName() }}</div>
@@ -47,6 +47,9 @@
             <div class="mb-agent-card__listing-label">Properties<br>for Rent</div>
         </div>
     </div>
+    @unless($static)
+        <span class="mb-agent-card__cta">View {{ $agent->name }} portfolio</span>
+    @endunless
 @if($static)
 </div>
 @else

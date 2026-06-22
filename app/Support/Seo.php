@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Listing;
 use App\Models\User;
+use App\Support\ListingBrowseUrl;
 use Illuminate\Support\Str;
 
 class Seo
@@ -76,7 +77,7 @@ class Seo
         return [
             'title' => $title,
             'description' => Str::limit($description, 160, ''),
-            'canonical' => route('listings.index', array_filter($filters)),
+            'canonical' => ListingBrowseUrl::forListings($filters),
         ];
     }
 
@@ -106,7 +107,7 @@ class Seo
         return [
             'title' => $heading.' — '.$siteName,
             'description' => 'Browse land listings for sale and rent across Sri Lanka on '.$siteName.'. Filter by location and price.',
-            'canonical' => route('lands.index', array_filter($filters)),
+            'canonical' => ListingBrowseUrl::forLands($filters),
         ];
     }
 

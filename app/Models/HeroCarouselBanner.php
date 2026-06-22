@@ -147,7 +147,23 @@ class HeroCarouselBanner extends Model
         return $banners->map(fn (self $banner) => [
             'image' => 'storage/'.$banner->image_path,
             'alt' => $banner->alt,
-            'url' => $banner->url,
+            'url' => self::normalizeUrl($banner->url),
         ])->all();
+    }
+
+    public static function normalizeUrl(?string $url): ?string
+    {
+        $url = trim((string) $url);
+
+        if (
+            $url === ''
+            || $url === '#'
+            || str_starts_with($url, '#')
+            || str_starts_with(strtolower($url), 'javascript:')
+        ) {
+            return null;
+        }
+
+        return $url;
     }
 }

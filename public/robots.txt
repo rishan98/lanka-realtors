@@ -7,4 +7,4 @@ Disallow: /register
 Disallow: /password
 Disallow: /home
 
-Sitemap: /sitemap.xml
+Sitemap: https://lankarealtorsweb.lk/sitemap.xml

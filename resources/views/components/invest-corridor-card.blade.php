@@ -33,5 +33,6 @@
                 <span class="mb-corridor-card__stat-label">{{ $secondary['label'] }}</span>
             </div>
         </div>
+        <span class="mb-corridor-card__cta">View {{ $listing->title }} project listing</span>
     </div>
 </a>

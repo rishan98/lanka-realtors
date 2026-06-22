@@ -189,7 +189,7 @@
         <section class="listing-detail__similar">
             <header class="listing-detail__similar-header">
                 <h2 class="listing-detail__section-title">Similar properties</h2>
-                <a href="{{ route('listings.index', array_filter(['kind' => $listing->listing_kind, 'city' => $listing->city, 'subtype' => $listing->property_subtype])) }}" class="listing-detail__similar-link">View all &rarr;</a>
+                <a href="{{ route('listings.index', array_filter(['kind' => $listing->listing_kind, 'city' => $listing->city, 'subtype' => $listing->property_subtype])) }}" class="listing-detail__similar-link">View all similar properties</a>
             </header>
 
             @if($similarListings->isEmpty())

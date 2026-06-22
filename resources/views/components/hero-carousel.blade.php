@@ -17,12 +17,18 @@
                     ? $slide['image']
                     : asset($slide['image']);
                 $alt = $slide['alt'] ?? 'Featured property';
-                $url = $slide['url'] ?? null;
+                $url = isset($slide['url']) ? trim((string) $slide['url']) : null;
+                $crawlableUrl = is_string($url)
+                    && $url !== ''
+                    && $url !== '#'
+                    && ! str_starts_with($url, '#')
+                    && ! str_starts_with(strtolower($url), 'javascript:');
             @endphp
             <div class="hero-carousel__slide{{ $index === 0 ? ' is-active' : '' }}" data-hero-carousel-slide aria-hidden="{{ $index === 0 ? 'false' : 'true' }}">
-                @if($url)
+                @if($crawlableUrl)
                     <a class="hero-carousel__link" href="{{ $url }}">
-                        <img class="hero-carousel__image" src="{{ $src }}" alt="{{ $alt }}" @if($index === 0) fetchpriority="high" @else loading="lazy" @endif>
+                        <span class="hero-carousel__link-text">{{ $alt }}</span>
+                        <img class="hero-carousel__image" src="{{ $src }}" alt="" role="presentation" @if($index === 0) fetchpriority="high" @else loading="lazy" @endif>
                     </a>
                 @else
                     <img class="hero-carousel__image" src="{{ $src }}" alt="{{ $alt }}" @if($index === 0) fetchpriority="high" @else loading="lazy" @endif>

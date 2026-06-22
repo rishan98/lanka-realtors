@@ -2,6 +2,7 @@
     $user = auth()->user();
     $active = fn (string ...$names) => request()->routeIs(...$names) ? ' is-active' : '';
     $pendingCount = \App\Models\User::agents()->pendingApproval()->count();
+    $pendingReviewCount = \App\Models\AgentReview::pending()->count();
 @endphp
 
 <aside class="agent-sidebar admin-sidebar">
@@ -26,6 +27,13 @@
                 <span class="admin-nav__badge">{{ $pendingCount }}</span>
             @endif
         </a>
+        <a class="agent-nav__link{{ $active('admin.reviews.*') }}" href="{{ route('admin.reviews.index') }}">
+            <span class="agent-nav__icon" aria-hidden="true">☆</span>
+            Agent reviews
+            @if($pendingReviewCount > 0)
+                <span class="admin-nav__badge">{{ $pendingReviewCount }}</span>
+            @endif
+        </a>
         <a class="agent-nav__link{{ $active('admin.agents.*') }}" href="{{ route('admin.agents.index') }}">
             <span class="agent-nav__icon" aria-hidden="true">★</span>
             Agent ratings
@@ -46,9 +54,9 @@
             <span class="agent-nav__icon" aria-hidden="true">✉</span>
             Contact inquiries
         </a>
-        <a class="agent-nav__link" href="{{ route('listings.index') }}">
+        <a class="agent-nav__link{{ $active('admin.listings.*') }}" href="{{ route('admin.listings.index') }}">
             <span class="agent-nav__icon" aria-hidden="true">▦</span>
-            All listings
+            Property ads
         </a>
         <a class="agent-nav__link" href="{{ route('portal.home') }}">
             <span class="agent-nav__icon" aria-hidden="true">↗</span>

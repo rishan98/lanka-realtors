@@ -180,7 +180,7 @@
             <div class="portfolio-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="agent-review-modal-title">
                 <button type="button" class="portfolio-modal__close" data-review-close aria-label="Close review form">&times;</button>
                 <h2 class="portfolio-modal__title" id="agent-review-modal-title">Add a review for {{ $agent->name }}</h2>
-                <p class="portfolio-modal__lead muted">Share your experience working with this agent. Your review will be sent to the agent for approval before it appears here.</p>
+                <p class="portfolio-modal__lead muted">Share your experience working with this agent. Your review will be checked by an administrator before it appears here.</p>
 
                 <form class="agent-review-form" id="agent-review-form" novalidate>
                     @csrf
@@ -551,7 +551,7 @@
                 closeReviewModal();
                 openNoticeModal({
                     title: 'Review submitted',
-                    message: data.message || 'Thank you for your review. It will appear on this portfolio after the agent approves it.'
+                    message: data.message || 'Thank you for your review. It will appear on this portfolio after an administrator approves it.'
                 });
             })
             .catch(function (error) {

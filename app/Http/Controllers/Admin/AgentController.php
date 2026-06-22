@@ -52,4 +52,20 @@ class AgentController extends Controller
 
         return back()->with('status', $user->name.'\'s rating has been updated.');
     }
+
+    public function updateAvatar(Request $request, User $user): RedirectResponse
+    {
+        if (! $user->isAgent()) {
+            return back()->with('status', 'Only agent profile photos can be updated here.');
+        }
+
+        $data = $request->validate([
+            'avatar' => ['required', 'image', 'max:2048'],
+        ]);
+
+        $user->avatar_path = $data['avatar']->store('agents/avatars', 'public');
+        $user->save();
+
+        return back()->with('status', $user->name.'\'s profile image has been updated.');
+    }
 }

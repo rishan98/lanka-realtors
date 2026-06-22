@@ -58,7 +58,7 @@ class AgentReview extends Model
         return match ($this->status) {
             self::STATUS_APPROVED => 'Approved',
             self::STATUS_REJECTED => 'Rejected',
-            default => 'Pending approval',
+            default => 'Pending admin approval',
         };
     }
 

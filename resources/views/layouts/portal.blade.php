@@ -6,6 +6,8 @@
     <meta name="theme-color" content="#eef1f5">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name'))</title>
+    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     @include('partials.seo')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,19 +25,18 @@
                     <div class="site-header__bar-end">
                         <div class="header-actions">
                             @auth
-                                <a href="{{ auth()->user()->dashboardRoute() }}" class="btn-outline-header btn--header-sm">Dashboard</a>
+                                <a href="{{ auth()->user()->dashboardRoute() }}" class="btn-outline-header btn--header-sm">Agent dashboard</a>
                                 @unless(auth()->user()->isAdmin())
-                                    <a class="btn-gold btn-gold--header" href="{{ auth()->user()->postListingRoute() }}">Post Your Ad</a>
+                                    <a class="btn-gold btn-gold--header" href="{{ auth()->user()->postListingRoute() }}">Post your property ad</a>
                                 @endunless
-                                <a class="btn-outline-header btn--header-sm" href="{{ route('logout') }}"
-                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none">
+                                <form action="{{ route('logout') }}" method="POST" class="header-actions__logout">
                                     @csrf
+                                    <button type="submit" class="btn-outline-header btn--header-sm">Log out</button>
                                 </form>
                             @else
-                                <a class="btn-gold btn-gold--header" href="{{ route('register', ['role' => 'owner']) }}">Post Your Ad</a>
-                                <a href="{{ route('login') }}" class="btn-outline-header btn--header-sm">Login</a>
-                                <a href="{{ route('register') }}" class="btn-gold btn-gold--header">Sign up</a>
+                                <a class="btn-gold btn-gold--header" href="{{ route('register', ['role' => 'owner']) }}">Post your property ad</a>
+                                <a href="{{ route('login') }}" class="btn-outline-header btn--header-sm">Log in to Lanka Realtors</a>
+                                <a href="{{ route('register') }}" class="btn-gold btn-gold--header">Create an account</a>
                             @endauth
                         </div>
                         <label class="nav-toggle-label" for="nav-toggle">Menu</label>

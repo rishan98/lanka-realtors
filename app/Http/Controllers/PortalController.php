@@ -29,7 +29,10 @@ class PortalController extends Controller
             ->orderedByRating();
 
         $heroTopAgents = (clone $topAgentsQuery)->take(3)->get();
-        $topAgents = (clone $topAgentsQuery)->take(4)->get();
+        $topAgents = (clone $topAgentsQuery)
+            ->whereNotIn('id', $heroTopAgents->pluck('id'))
+            ->take(4)
+            ->get();
 
         $projectListings = Listing::published()
             ->fromAgents()

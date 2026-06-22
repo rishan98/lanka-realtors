@@ -41,6 +41,12 @@
                                 loading="lazy"
                                 decoding="async"
                             >
+                            <form method="POST" action="{{ route('admin.agents.avatar', $agent) }}" enctype="multipart/form-data" style="margin-top:8px;display:grid;gap:6px">
+                                @csrf
+                                <label class="sr-only" for="avatar-{{ $agent->id }}">Update profile image for {{ $agent->name }}</label>
+                                <input id="avatar-{{ $agent->id }}" type="file" name="avatar" class="input" accept="image/*" required>
+                                <button type="submit" class="pill">Update photo</button>
+                            </form>
                         </td>
                         <td>
                             <strong>{{ $agent->name }}</strong>

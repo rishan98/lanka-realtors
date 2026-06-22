@@ -5,18 +5,19 @@
 @php($href = route('agents.portfolio', $agent))
 
 <article class="top-agent-card{{ $compact ? ' top-agent-card--compact' : '' }}">
-    <a href="{{ $href }}" class="top-agent-card__link" aria-label="View {{ $agent->name }} portfolio">
+    <a href="{{ $href }}" class="top-agent-card__link">
         @if($compact)
-            <img class="top-agent-card__photo" src="{{ $agent->avatarUrl() }}" alt="">
+            <img class="top-agent-card__photo" src="{{ $agent->avatarUrl() }}" alt="{{ $agent->name }}, verified real estate agent">
             <div class="top-agent-card__identity">
                 @if($agent->hasRating())
                     <span class="top-agent-card__rating">{{ $agent->formattedRating() }} ★</span>
                 @endif
-                <h3 class="top-agent-card__name">{{ $agent->name }}</h3>
+                <p class="top-agent-card__name">{{ $agent->name }}</p>
+                <span class="top-agent-card__cta">View {{ $agent->name }} portfolio</span>
             </div>
         @else
             <header class="top-agent-card__header">
-                <img class="top-agent-card__photo" src="{{ $agent->avatarUrl() }}" width="56" height="56" alt="">
+                <img class="top-agent-card__photo" src="{{ $agent->avatarUrl() }}" width="56" height="56" alt="{{ $agent->name }}">
                 <div class="top-agent-card__identity">
                     @if($agent->is_preferred)
                         <span class="top-agent-card__badge-label">LR Preferred</span>
@@ -36,7 +37,7 @@
             <div class="top-agent-card__body">
                 <div class="top-agent-card__company">
                     @if($logo = $agent->companyLogoUrl())
-                        <img class="top-agent-card__logo" src="{{ $logo }}" width="40" height="40" alt="">
+                        <img class="top-agent-card__logo" src="{{ $logo }}" width="40" height="40" alt="{{ $agent->companyDisplayName() }} logo">
                     @else
                         <span class="top-agent-card__logo-fallback" aria-hidden="true">{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($agent->companyDisplayName(), 0, 1)) }}</span>
                     @endif
@@ -61,6 +62,7 @@
                     <span class="top-agent-card__stat-label">Properties for Rent</span>
                 </div>
             </footer>
+            <span class="top-agent-card__cta">View {{ $agent->name }} portfolio</span>
         @endif
     </a>
 </article>

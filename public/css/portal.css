@@ -112,6 +112,11 @@ img {
     flex-wrap: wrap;
 }
 
+.header-actions__logout {
+    margin: 0;
+    display: inline-flex;
+}
+
 .btn--header-sm {
     padding: 8px 14px;
     font-size: 0.85rem;
@@ -121,6 +126,18 @@ img {
     display: inline-flex;
     align-items: center;
     transition: opacity 0.2s ease;
+}
+
+.brand__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .brand__logo {
@@ -1910,7 +1927,21 @@ img {
 }
 
 .hero-carousel__link {
+    position: relative;
     height: 100%;
+}
+
+.hero-carousel__link-text {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(180deg, transparent, rgba(11, 27, 51, 0.72));
 }
 
 .hero-carousel__image {
@@ -2737,7 +2768,6 @@ a.mb-tab {
     min-height: 100%;
     padding: 22px 20px 20px;
     border-radius: 18px;
-    text-decoration: none;
     color: inherit;
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.52) 100%);
     backdrop-filter: blur(14px) saturate(140%);
@@ -2747,12 +2777,10 @@ a.mb-tab {
         0 1px 0 rgba(255, 255, 255, 1) inset,
         0 16px 40px rgba(11, 27, 51, 0.07),
         0 2px 8px rgba(11, 27, 51, 0.04);
-    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
     overflow: hidden;
 }
 
-.advice-card:hover {
-    transform: translateY(-4px);
+.advice-card:has(.advice-card__link:hover) {
     border-color: rgba(201, 162, 39, 0.4);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 1) inset,
@@ -2851,23 +2879,27 @@ a.mb-tab {
     color: var(--muted);
 }
 
-.advice-card__link-label {
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--gold);
-    opacity: 0.9;
-}
-
-.advice-card:hover .advice-card__link-label {
+.advice-card__link {
+    margin-top: auto;
+    display: inline-flex;
+    align-self: flex-start;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--navy);
     text-decoration: underline;
     text-underline-offset: 3px;
 }
 
+.advice-card__link:hover {
+    color: #8a6f18;
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .advice-card:hover {
-        transform: none;
+    .advice-card:has(.advice-card__link:hover) {
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 1) inset,
+            0 16px 40px rgba(11, 27, 51, 0.07),
+            0 2px 8px rgba(11, 27, 51, 0.04);
     }
 
     .advice-card:hover .advice-card__shine {
@@ -3287,7 +3319,48 @@ a.mb-tab {
     color: #8a6f18;
 }
 
-.top-agent-card--compact .top-agent-card__badge-label,
+.top-agent-card--compact .top-agent-card__cta {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--muted);
+    line-height: 1.3;
+}
+
+.top-agent-card__cta {
+    display: block;
+    padding: 10px 14px 12px;
+    border-top: 1px solid rgba(11, 27, 51, 0.08);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: center;
+}
+
+.mb-agent-card__cta {
+    display: block;
+    padding: 10px 14px 12px;
+    border-top: 1px solid rgba(11, 27, 51, 0.08);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: center;
+}
+
+.modern-property-card__cta,
+.mb-corridor-card__cta {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.35;
+}
+
+.top-agent-card--compact .top-agent-card__link:hover .top-agent-card__cta {
+    color: #8a6f18;
+}
 .top-agent-card--compact .top-agent-card__medal,
 .top-agent-card--compact .top-agent-card__body,
 .top-agent-card--compact .top-agent-card__stats {

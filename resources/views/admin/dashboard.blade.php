@@ -18,6 +18,13 @@
     </div>
 @endif
 
+@if($pendingReviewCount > 0)
+    <div class="admin-alert" role="status">
+        <p><strong>{{ $pendingReviewCount }}</strong> agent review{{ $pendingReviewCount === 1 ? '' : 's' }} awaiting your approval.</p>
+        <a class="btn-gold" href="{{ route('admin.reviews.index') }}">Moderate reviews</a>
+    </div>
+@endif
+
 <section aria-label="User statistics">
     <div class="admin-stats">
         <article class="admin-stat admin-stat--admins">
@@ -67,7 +74,7 @@
 <div class="admin-actions">
     <a class="btn-gold" href="{{ route('admin.users.pending') }}">Pending registrations</a>
     <a class="pill" href="{{ route('admin.contact-inquiries.index') }}">Contact inquiries</a>
-    <a class="pill" href="{{ route('listings.index') }}">Browse listings</a>
+    <a class="pill" href="{{ route('admin.listings.index') }}">Manage property ads</a>
     <a class="pill" href="{{ route('portal.home') }}">Public homepage</a>
 </div>
 

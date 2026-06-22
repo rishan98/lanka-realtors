@@ -124,6 +124,21 @@ class Listing extends Model
         return $query->where('status', 'published');
     }
 
+    public function isPublished(): bool
+    {
+        return $this->status === 'published';
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status === 'draft';
+    }
+
+    public function adminStatusLabel(): string
+    {
+        return $this->isPublished() ? 'Active' : 'Deactivated';
+    }
+
     public function scopeFromOwners($query)
     {
         return $query->whereHas('user', function ($userQuery) {

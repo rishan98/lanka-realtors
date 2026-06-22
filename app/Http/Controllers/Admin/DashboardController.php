@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AgentReview;
 use App\Models\ContactInquiry;
 use App\Models\Listing;
 use App\Models\User;
@@ -37,6 +38,7 @@ class DashboardController extends Controller
             ->get();
 
         $inquiryCount = ContactInquiry::count();
+        $pendingReviewCount = AgentReview::pending()->count();
 
         $recentInquiries = ContactInquiry::query()
             ->latest()
@@ -48,6 +50,7 @@ class DashboardController extends Controller
             'listingStats',
             'pendingUsers',
             'inquiryCount',
+            'pendingReviewCount',
             'recentInquiries'
         ));
     }

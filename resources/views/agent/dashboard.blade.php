@@ -46,7 +46,7 @@
     <a class="btn-gold" href="{{ route('agent.listings.create') }}">New listing</a>
     <a class="pill" href="{{ route('agent.listings.index') }}">All listings</a>
     @if($stats['pending_reviews'] > 0)
-        <a class="pill" href="{{ route('agent.reviews.index') }}">Review pending ({{ $stats['pending_reviews'] }})</a>
+        <a class="pill" href="{{ route('agent.reviews.index') }}">{{ $stats['pending_reviews'] }} review{{ $stats['pending_reviews'] === 1 ? '' : 's' }} awaiting admin approval</a>
     @endif
     <a class="pill" href="{{ route('agent.profile.edit') }}">Edit profile</a>
 </div>

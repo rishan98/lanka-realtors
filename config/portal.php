@@ -107,7 +107,7 @@ return [
             'title' => 'New development projects',
             'text' => 'Under-construction inventory with clear handover expectations.',
             'cta' => 'Explore projects',
-            'route' => 'listings.index',
+            'route' => 'listings.browse-kind',
             'params' => ['kind' => 'projects'],
         ],
         [
@@ -123,21 +123,28 @@ return [
         [
             'title' => 'Research & insights',
             'text' => 'Understand pricing trends and documentation before you commit.',
-            'href' => '#',
+            'link_label' => 'Browse property listings in Sri Lanka',
+            'route' => 'listings.index',
+            'params' => [],
         ],
         [
             'title' => 'Legal & tax basics',
             'text' => 'Know your stamp duty, titles, and approvals—always verify with a lawyer.',
-            'href' => '#',
+            'link_label' => 'Read about Lanka Realtors',
+            'route' => 'about',
+            'params' => [],
         ],
         [
             'title' => 'Locality guide',
             'text' => 'Use Locate me and city filters to narrow schools, commute, and lifestyle fit.',
-            'href' => '#',
+            'link_label' => 'Open map-based property search',
+            'route' => 'locate',
+            'params' => [],
         ],
         [
             'title' => 'List with confidence',
             'text' => 'Agents can publish rich listings with photos, BHK, and built-up area.',
+            'link_label' => 'Register as an agent',
             'route' => 'register',
             'params' => [],
         ],
@@ -157,19 +164,19 @@ return [
         [
             'title' => 'Flats & apartments for sale',
             'links' => [
-                ['label' => 'Colombo', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'apartment', 'city' => 'Colombo']],
-                ['label' => 'Kandy', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'apartment', 'city' => 'Kandy']],
-                ['label' => 'Galle', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'apartment', 'city' => 'Galle']],
-                ['label' => 'Negombo', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'apartment', 'city' => 'Negombo']],
+                ['label' => 'Apartments for sale in Colombo', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'apartment', 'city' => 'Colombo']],
+                ['label' => 'Apartments for sale in Kandy', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'apartment', 'city' => 'Kandy']],
+                ['label' => 'Apartments for sale in Galle', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'apartment', 'city' => 'Galle']],
+                ['label' => 'Apartments for sale in Negombo', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'apartment', 'city' => 'Negombo']],
             ],
         ],
         [
             'title' => 'Houses & villas for sale',
             'links' => [
-                ['label' => 'Colombo', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'house', 'city' => 'Colombo']],
-                ['label' => 'Mount Lavinia', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'house', 'city' => 'Dehiwala-Mount Lavinia']],
-                ['label' => 'Jaffna', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'house', 'city' => 'Jaffna']],
-                ['label' => 'Matara', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'house', 'city' => 'Matara']],
+                ['label' => 'Houses for sale in Colombo', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'house', 'city' => 'Colombo']],
+                ['label' => 'Houses for sale in Mount Lavinia', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'house', 'city' => 'Dehiwala-Mount Lavinia']],
+                ['label' => 'Houses for sale in Jaffna', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'house', 'city' => 'Jaffna']],
+                ['label' => 'Houses for sale in Matara', 'route' => 'listings.index', 'params' => ['kind' => 'sale', 'subtype' => 'house', 'city' => 'Matara']],
             ],
         ],
         [
